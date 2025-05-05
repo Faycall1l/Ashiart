@@ -48,19 +48,19 @@ pip install .
 
 ```bash
 # Basic usage (outputs to console)
-ashiart path/to/image.jpg
+ashiart docs/images/sample.jpg
 
 # Save to file
-ashiart path/to/image.jpg -o output.txt
+ashiart docs/images/sample.jpg -o output.txt
 
 # Change output width to 80 characters
-ashiart path/to/image.jpg -w 80
+ashiart docs/images/sample.jpg -w 80
 
 # Specify both width and height
-ashiart path/to/image.jpg -w 80 -H 40
+ashiart docs/images/sample.jpg -w 80 -H 40
 
 # Use custom ASCII characters (from darkest to lightest)
-ashiart path/to/image.jpg -c "#@%*+=-:. "
+ashiart docs/images/sample.jpg -c "#@%*+=-:. "
 ```
 
 ### Standard Python API
@@ -69,12 +69,12 @@ ashiart path/to/image.jpg -c "#@%*+=-:. "
 from ashiart import AsciiArtGenerator, image_to_ascii
 
 # Quick conversion with the convenience function
-ascii_art = image_to_ascii("path/to/image.jpg", width=80)
+ascii_art = image_to_ascii("docs/images/sample.jpg", width=80)
 print(ascii_art)
 
 # Or use the full-featured class
 generator = AsciiArtGenerator(width=80)
-ascii_art = generator.generate_from_image("path/to/image.jpg")
+ascii_art = generator.generate_from_image("docs/images/sample.jpg")
 print(ascii_art)
 
 # Save the output to a file
@@ -94,7 +94,7 @@ from ashiart import EnhancedAsciiArtGenerator, image_to_enhanced_ascii, image_to
 
 # Basic enhanced usage
 generator = EnhancedAsciiArtGenerator(width=80, mode="standard")
-ascii_art = generator.generate_from_image("path/to/image.jpg")
+ascii_art = generator.generate_from_image("docs/images/example.jpg")
 print(ascii_art)
 
 # Apply image enhancements
@@ -104,7 +104,7 @@ generator.set_enhancement(
     edge_enhance=True,  # Enhance edges
     dithering=True      # Apply dithering
 )
-ascii_art = generator.generate_from_image("path/to/image.jpg")
+ascii_art = generator.generate_from_image("docs/images/example.jpg")
 
 # Use different rendering modes
 # Standard ASCII characters
@@ -121,7 +121,7 @@ generator = EnhancedAsciiArtGenerator(width=40, mode="braille")
 
 # Generate HTML output with preserved colors
 html = generator.generate_html(
-    "path/to/image.jpg",
+    "docs/images/example.jpg",
     preserve_color=True,
     font_size=8
 )
@@ -129,7 +129,7 @@ generator.save_html_to_file(html, "output.html")
 
 # Convenience functions
 ascii_art = image_to_enhanced_ascii(
-    "path/to/image.jpg",
+    "docs/images/sample.jpg",
     width=80,
     mode="dense",
     contrast=1.3,
@@ -137,7 +137,7 @@ ascii_art = image_to_enhanced_ascii(
 )
 
 html = image_to_html_ascii(
-    "path/to/image.jpg",
+    "docs/images/example.jpg",
     width=80,
     preserve_color=True
 )
