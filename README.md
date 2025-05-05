@@ -1,13 +1,8 @@
 # AshiArt - ASCII Art Generator
 
 ![Python](https://img.shields.io/badge/python-3.6%2B-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
 
 A Python package for converting images to ASCII art with standard and enhanced features.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/example.jpg" alt="AshiArt Sample" width="500"/>
-</p>
 
 ## Features
 
@@ -175,8 +170,4 @@ pytest
 
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details. 
+Contributions are welcome! Please feel free to submit a Pull Request. 
