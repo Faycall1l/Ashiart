@@ -30,7 +30,7 @@ A Python package for converting images to ASCII art with standard and enhanced f
 ## Installation
 
 ```bash
-# From PyPI (coming soon)
+# From PyPI
 pip install ashiart
 
 # From GitHub
