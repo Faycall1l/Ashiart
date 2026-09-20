@@ -13,7 +13,7 @@ except ImportError:
     # Some dependencies might be missing (numpy)
     HAS_ENHANCED = False
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 __all__ = ["AsciiArtGenerator", "image_to_ascii"]
 
 if HAS_ENHANCED:
