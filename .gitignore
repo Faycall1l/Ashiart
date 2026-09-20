@@ -68,12 +68,16 @@ venv.bak/
 # macOS
 .DS_Store
 
-# Project specific
+# Project specific (generated outputs; curated assets under docs/ are tracked)
 *.txt
 !requirements.txt
 *.jpg
 *.jpeg
 *.png
 *.gif
+!docs/images/*.jpg
+!docs/images/*.jpeg
+!docs/images/*.png
+!docs/images/*.gif
 output*/
 demo_outputs/ 
