@@ -17,7 +17,7 @@
     <circle cx="46" cy="46" r="4" fill="#FF5F56"/>
     <circle cx="60" cy="46" r="4" fill="#FEBC2E"/>
     <circle cx="74" cy="46" r="4" fill="#28C840"/>
-    <title>Brightness ramp: @ # S % ? * + ; : , . (darkest to lightest)</title>
+    <title>Brightness ramp: @ # S % ? * + ; : , . + space (darkest to lightest)</title>
     <!-- Hero glyph: "@" is index 0, the darkest character of the ramp -->
     <text x="44" y="88" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="38" font-weight="700" fill="url(#accent)">@</text>
     <!-- Full project ramp in exact code order, opacity fading dark to light -->

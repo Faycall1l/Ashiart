@@ -9,8 +9,9 @@ from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 class EnhancedAsciiArtGenerator:
     """An enhanced ASCII art generator with advanced features."""
 
-    # Default ASCII characters from darkest to lightest
-    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
+    # Default ASCII characters from darkest to lightest (trailing space =
+    # paper white, matching the canonical density ramps)
+    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
     
     # High-density character set (70 shades)
     DENSE_CHARS = ["$", "@", "B", "%", "8", "&", "W", "M", "#", "*", "o", "a", "h", "k", 
@@ -58,12 +59,14 @@ class EnhancedAsciiArtGenerator:
         self.contrast = 1.0
         self.brightness = 1.0
         self.sharpness = 1.0
+        self.autocontrast = True
         self.dithering = False
         self.edge_enhance = False
         self.invert = False
 
     def set_enhancement(self, contrast=None, brightness=None, sharpness=None, 
-                       dithering=None, edge_enhance=None, invert=None):
+                        autocontrast=None, dithering=None, edge_enhance=None,
+                        invert=None):
         """
         Set image enhancement parameters.
         
@@ -71,6 +74,8 @@ class EnhancedAsciiArtGenerator:
             contrast (float, optional): Contrast adjustment (1.0 is neutral). 
             brightness (float, optional): Brightness adjustment (1.0 is neutral).
             sharpness (float, optional): Sharpness adjustment (1.0 is neutral).
+            autocontrast (bool, optional): Stretch gray levels to the full
+                ramp before mapping.
             dithering (bool, optional): Whether to apply dithering.
             edge_enhance (bool, optional): Whether to enhance edges.
             invert (bool, optional): Whether to invert the image.
@@ -81,6 +86,8 @@ class EnhancedAsciiArtGenerator:
             self.brightness = brightness
         if sharpness is not None:
             self.sharpness = sharpness
+        if autocontrast is not None:
+            self.autocontrast = autocontrast
         if dithering is not None:
             self.dithering = dithering
         if edge_enhance is not None:
@@ -102,11 +109,11 @@ class EnhancedAsciiArtGenerator:
             # For braille, we want 4x the width and 2x the height for proper mapping
             width = self.width * 2
             height = self.height * 4 if self.height else int(image.height * width / image.width / 1.25)
-            return image.resize((width, height))
+            return image.resize((width, height), Image.LANCZOS)
         else:
             width = self.width
-            height = self.height or int(image.height * width / image.width / 2.5)
-            return image.resize((width, height))
+            height = self.height or int(image.height * width / image.width * 0.5)
+            return image.resize((width, height), Image.LANCZOS)
 
     def _enhance_image(self, image):
         """
@@ -142,7 +149,7 @@ class EnhancedAsciiArtGenerator:
 
     def _convert_to_grayscale(self, image):
         """
-        Convert image to grayscale.
+        Convert image to grayscale, stretching levels to the full ramp.
         
         Args:
             image (PIL.Image): The image to convert.
@@ -150,7 +157,10 @@ class EnhancedAsciiArtGenerator:
         Returns:
             PIL.Image: The grayscale image.
         """
-        return image.convert("L")
+        gray = image.convert("L")
+        if self.autocontrast:
+            gray = ImageOps.autocontrast(gray, cutoff=1)
+        return gray
 
     def _apply_dithering(self, image):
         """
@@ -189,8 +199,10 @@ class EnhancedAsciiArtGenerator:
             ascii_row = []
             
             for pixel in row:
-                # Map pixel value (0-255) to an index in our ASCII characters list
-                index = int(pixel * (len(self.chars) - 1) / 255)
+                # Map pixel value (0-255) to a ramp index; round (not trunc)
+                # so each character owns a symmetric brightness bucket.
+                index = round(pixel * (len(self.chars) - 1) / 255)
+                index = max(0, min(index, len(self.chars) - 1))
                 ascii_row.append(self.chars[index])
             
             ascii_image.append(ascii_row)
@@ -441,7 +453,8 @@ class EnhancedAsciiArtGenerator:
         for y in range(height):
             for x in range(width):
                 pixel_value = gray_pixels[y, x]
-                index = int(pixel_value * (len(self.chars) - 1) / 255)
+                index = round(pixel_value * (len(self.chars) - 1) / 255)
+                index = max(0, min(index, len(self.chars) - 1))
                 char = self.chars[index]
                 
                 if preserve_color and len(color_pixels.shape) > 2:
@@ -486,8 +499,8 @@ class EnhancedAsciiArtGenerator:
 # Convenience functions
 def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard", 
                           contrast=1.0, brightness=1.0, sharpness=1.0, 
-                          dithering=False, edge_enhance=False, invert=False,
-                          ansi=False):
+                          autocontrast=True, dithering=False, edge_enhance=False,
+                          invert=False, ansi=False):
     """
     Convenience function to convert an image to enhanced ASCII art.
     
@@ -500,6 +513,7 @@ def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard",
         contrast (float, optional): Contrast adjustment (1.0 is neutral).
         brightness (float, optional): Brightness adjustment (1.0 is neutral).
         sharpness (float, optional): Sharpness adjustment (1.0 is neutral).
+        autocontrast (bool, optional): Stretch gray levels to the full ramp.
         dithering (bool, optional): Whether to apply dithering.
         edge_enhance (bool, optional): Whether to enhance edges.
         invert (bool, optional): Whether to invert the image.
@@ -510,7 +524,8 @@ def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard",
     """
     generator = EnhancedAsciiArtGenerator(width=width, height=height, mode=mode)
     generator.set_enhancement(contrast=contrast, brightness=brightness, 
-                            sharpness=sharpness, dithering=dithering, 
+                            sharpness=sharpness, autocontrast=autocontrast,
+                            dithering=dithering, 
                             edge_enhance=edge_enhance, invert=invert)
     return generator.generate_from_image(image_path, ansi=ansi)
 

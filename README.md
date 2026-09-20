@@ -43,25 +43,36 @@ that keep the original colors.
 
 Input formats are whatever Pillow supports, including JPEG and PNG.
 
-Sample output (`docs/images/sample.jpg`, width 60):
+Sample output (`docs/images/sample.jpg`, width 60, standard mode):
 
 ```text
-#SS#SS%????**?%SSSSSSSSSSS%?**??%?;::::;%S#######SSSSSSS####
-######SSSSS%%SSSSSSSSS%%%%???*????+::::+S######SSS##SSS#####
-#############SSSSS%%S%%????????*?****++*%S##################
-#############SSS%%??**;;;;;;+*??%%?%SSS%%%%%#############SSS
-##############S?%**?%??**+;++;++;;++++*++??%%S##SSSS#####SSS
-##############?**%#@@@##SS%?+;+++++?%??%%?**??SSSS##########
-############@%++?SS#@##@@@@%++++++%@@##@@@#S**?SSSS#########
-#############***+??%S###@@S*+*%*+*S@@@@@#SS%***?############
-#######@#####+*S?+**?**?%%*;;?@?++S###SS%??**??*S###########
-#############?*%#%+;;;;+**+;+??++*???*+***??%???%###########
-###########@@#??%#?;::;+*%?*++**???+;;;;+?%???%%%S##########
-##############%%??SS?+;;+*?%?%?%?*+;;:+%S%???S#SS%@@@#######
-##############%?%?%%SSS?*++*%%**+***?%S%%?%??S#SS%#@@#######
-##############%????%%%%SSS%?%%?%SSSSSS%%%%%%%S##%S##########
-##############S%%%%%%SSSSS#######SSSSSSSSSSSSSSSSSSS########
-SSS###########SSSSSSSS############SS##S##S#S##SSSSSS####SS##
+SSSSS%*++++;;+?%SSSSSSSSS%*;::;+*+.    ,?SS###SSSSSSSSSSSSS#
+S####SS%???**?%%%%%%SS%%%???**??%?:    ,%####SSSSSSSSSSSSSSS
+###########SSSSS%%%%%??*?*++;::::::,.  ;S@##SSSSSS###S##SSSS
+#######SSS#SSSSSS??%%%?;;;;+?%%**?***++;+?S##############SSS
+############SSS%*%?+:,.....,,;**??*%S##?%?**S@##SSS#####SSSS
+###############*?+:+**+:::.,:,::,.::,:;,:*%S?%#SS%%S####SSSS
+#############@?+:+S@@@@S?**;:,::,,,;+;;+;:,;?+SSSSSSSS######
+#####@@@##@@@S::+S#@@##@@@@?:,:;,,+S####@#%*:;?SSSS#########
+############@*::+?%%@@@@@@#*:,;:,,%@@##@@@@#*:+%SSSS########
+#####@######@;;;:**?S#@@@@%:,;%+;;S@@@@@S%S?:+++#SS#########
+#####@@@@#@##:;%+:+++++*%?+,,+@?::S@###S?**+:*++############
+#######@#####;:%@+:::,,:;:,,,?%;,:*??+;;+*++??++%#S#########
+S###########@%;*S@: .,,:;+;,::;:;*+::,::::??*+*??###########
+###########@@@*++%%:  .:+??+::;+?*+:,. .+?%++*%%?%@@@#######
+#############@%?*+%S?:..,;*%????*;,.. :%#?++*S#SS?@@@@######
+##############?*%**?%SS+:,,;??+;::::+%S?**?++S#S%?@@@@@#####
+##############?+++*%??%SS%*;?*;+*%SSSS??%%??*%@S?%#@##@@@###
+##############%*?**?*?%SSS#SS#S##SSS%%%%%?%S%%S#%%S#########
+SSS##@@@######%%%%%%%SSSSSSS##SSSSSSSSS%SSSSSSSSSS%%########
+SSS#####SSSS##SSSS%SSSSS#S#SSS#S##SS#SS##S#S##%%SSSSSS#SSSS#
+```
+
+A closer crop (`docs/images/owl-face.jpg`, width 70) resolves the eyes,
+beak, and feather texture. Dense mode (70 levels) renders it best — try:
+
+```bash
+ashiart docs/images/owl-face.jpg --width 70 --mode dense
 ```
 
 ## Features
@@ -70,8 +81,8 @@ SSS###########SSSSSSSS############SS##S##S#S##SSSSSS####SS##
 - Four rendering modes: standard, dense, blocks, braille
 - ANSI truecolor terminal output sampled from the source image
 - Color-preserving HTML export with configurable font size
-- Image controls: contrast, brightness, sharpness, edge enhancement,
-  dithering, and inversion
+- Image controls: contrast, brightness, sharpness, autocontrast,
+  edge enhancement, dithering, and inversion
 - Custom character ramps ordered from darkest to lightest
 - Command-line interface and importable Python API
 - Cross-platform: macOS, Linux, and Windows
@@ -154,6 +165,7 @@ print(art)
 | `--brightness` | `1.0` | Brightness multiplier |
 | `--sharpness` | `1.0` | Sharpness multiplier |
 | `--edge-enhance` | off | Enhance edges before mapping |
+| `--no-autocontrast` | off | Disable automatic level stretching |
 | `--dithering` | off | Apply dithering for texture |
 | `--invert` | off | Invert brightness mapping |
 | `--color` | off | Emit ANSI truecolor escape codes |
@@ -220,17 +232,18 @@ html = image_to_html_ascii("docs/images/sample.jpg", width=80)
 
 | Mode | Character set | Best for |
 | --- | --- | --- |
-| `standard` | 11-level ASCII ramp | Clean, readable terminal output |
+| `standard` | 12-level ASCII ramp | Clean, readable terminal output |
 | `dense` | 70+ characters | Smoother gradients and detail |
 | `blocks` | Unicode block elements | High-contrast geometric look |
 | `braille` | Unicode braille patterns | Higher effective resolution |
 
 ## Character ramp
 
-The default ramp is ordered strictly from darkest to lightest:
+The default ramp is ordered strictly from darkest to lightest. It ends
+with a space, so pure white renders as blank paper instead of a dot:
 
 ```text
-@ # S % ? * + ; : , .
+@ # S % ? * + ; : , . (space)
 ```
 
 The header logo visualizes this same sequence as a brightness scale.
@@ -266,6 +279,7 @@ test/
 docs/images/
   logo.svg         Project logo and brightness-ramp reference
   sample.jpg       Sample input used in this README
+  owl-face.jpg     Tight face crop for high-detail demos
 examples/
   basic_usage.py
   enhanced_demo.py

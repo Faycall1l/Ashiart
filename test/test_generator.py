@@ -62,25 +62,40 @@ class TestAsciiArtGenerator(unittest.TestCase):
         """Test pixel to ASCII character mapping."""
         # Create a small test image with a gradient
         test_img = Image.new("L", (2, 2))
-        test_img.putdata([0, 128, 255, 64])  # Black, gray, white, dark gray
+        test_img.putdata([0, 128, 255, 32])  # Black, gray, white, dark gray
         
         # Use only 3 ASCII characters for simpler testing
         self.generator.chars = ["@", "O", "."]
         
         ascii_image = self.generator._map_pixels_to_ascii(test_img)
         
-        # Check that we get the expected characters
+        # Buckets are symmetric via round(): 0 -> first, 128 -> middle,
+        # 255 -> last, 32 (12% gray) -> first char
         self.assertEqual(ascii_image[0][0], "@")  # Darkest (0) -> first char
         self.assertEqual(ascii_image[0][1], "O")  # Mid gray (128) -> middle char
         self.assertEqual(ascii_image[1][0], ".")  # White (255) -> last char
-        self.assertEqual(ascii_image[1][1], "@")  # Dark gray (64) -> should be closer to first char
+        self.assertEqual(ascii_image[1][1], "@")  # Dark gray (32) -> first char
+
+    def test_default_ramp_ends_with_space(self):
+        """White must map to blank (paper), not a visible dot."""
+        self.assertEqual(AsciiArtGenerator.ASCII_CHARS[-1], " ")
+
+    def test_aspect_correction(self):
+        """Monospace glyphs are ~2:1, so rows sample at half rate."""
+        gen = AsciiArtGenerator(width=100)
+        resized = gen._resize_image(Image.new("RGB", (200, 100)))
+        self.assertEqual((resized.width, resized.height), (100, 25))
+
+    def test_autocontrast_on_by_default(self):
+        """Levels are stretched to the full ramp unless disabled."""
+        self.assertTrue(AsciiArtGenerator(width=10).autocontrast)
 
     def test_generate_from_image(self):
         """Test generating ASCII art from an image file."""
         ascii_art = self.generator.generate_from_image(self.test_image_path)
         
         # Check that we get a string with the expected dimensions
-        lines = ascii_art.strip().split("\n")
+        lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
         self.assertEqual(len(lines[0]), 10)  # 10 columns
 
@@ -89,7 +104,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
         ascii_art = self.generator.generate_from_pil_image(self.test_image)
         
         # Check that we get a string with the expected dimensions
-        lines = ascii_art.strip().split("\n")
+        lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
         self.assertEqual(len(lines[0]), 10)  # 10 columns
 
@@ -114,7 +129,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
         ascii_art = image_to_ascii(self.test_image_path, width=10, height=5)
         
         # Check that we get a string with the expected dimensions
-        lines = ascii_art.strip().split("\n")
+        lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
         self.assertEqual(len(lines[0]), 10)  # 10 columns
 

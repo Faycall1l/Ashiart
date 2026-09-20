@@ -46,6 +46,8 @@ def build_parser():
                         help="Sharpness adjustment, 1.0 is neutral (default: 1.0)")
     parser.add_argument("--edge-enhance", action="store_true",
                         help="Enhance edges before mapping")
+    parser.add_argument("--no-autocontrast", action="store_true",
+                        help="Disable automatic level stretching")
     parser.add_argument("--dithering", action="store_true",
                         help="Apply dithering for more texture")
     parser.add_argument("--invert", action="store_true",
@@ -76,6 +78,7 @@ def main(argv=None):
         contrast=args.contrast,
         brightness=args.brightness,
         sharpness=args.sharpness,
+        autocontrast=not args.no_autocontrast,
         dithering=args.dithering,
         edge_enhance=args.edge_enhance,
         invert=args.invert,

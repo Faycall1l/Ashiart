@@ -1,28 +1,35 @@
 """ASCII Art Generator module."""
 
 import os
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 class AsciiArtGenerator:
     """A class to generate ASCII art from images."""
 
-    # ASCII characters from darkest to lightest
-    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
+    # ASCII characters from darkest to lightest (trailing space = paper white,
+    # per the canonical density ramps: Bourke, "@%#*+=-:. ", etc.)
+    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
 
-    def __init__(self, chars=None, width=100, height=None):
+    # Monospace glyphs are ~2x taller than wide; sample half as many rows.
+    ASPECT_CORRECTION = 0.5
+
+    def __init__(self, chars=None, width=100, height=None, autocontrast=True):
         """
         Initialize the ASCII art generator.
         
         Args:
             chars (list, optional): ASCII characters from darkest to lightest. 
-                                   Defaults to None.
+                                    Defaults to None.
             width (int, optional): Width of output ASCII art. Defaults to 100.
             height (int, optional): Height of output ASCII art. Defaults to None.
+            autocontrast (bool, optional): Stretch gray levels to use the full
+                ramp (ImageOps.autocontrast). Defaults to True.
         """
         self.chars = chars or self.ASCII_CHARS
         self.width = width
         self.height = height
+        self.autocontrast = autocontrast
 
     def _resize_image(self, image):
         """
@@ -35,12 +42,14 @@ class AsciiArtGenerator:
             PIL.Image: The resized image.
         """
         width = self.width
-        height = self.height or int(image.height * width / image.width / 2.5)
-        return image.resize((width, height))
+        height = self.height or int(image.height * width / image.width * self.ASPECT_CORRECTION)
+        # LANCZOS: highest-quality downsampling; NEAREST (the default)
+        # aliases high-frequency detail into noise at char resolution.
+        return image.resize((width, height), Image.LANCZOS)
 
     def _convert_to_grayscale(self, image):
         """
-        Convert image to grayscale.
+        Convert image to grayscale, stretching levels to the full ramp.
         
         Args:
             image (PIL.Image): The image to convert.
@@ -48,7 +57,10 @@ class AsciiArtGenerator:
         Returns:
             PIL.Image: The grayscale image.
         """
-        return image.convert("L")
+        gray = image.convert("L")
+        if self.autocontrast:
+            gray = ImageOps.autocontrast(gray, cutoff=1)
+        return gray
 
     def _map_pixels_to_ascii(self, image):
         """
@@ -70,8 +82,10 @@ class AsciiArtGenerator:
             ascii_row = []
             
             for pixel in row:
-                # Map pixel value (0-255) to an index in our ASCII characters list
-                index = int(pixel * (len(self.chars) - 1) / 255)
+                # Map pixel value (0-255) to a ramp index; round (not trunc)
+                # so each character owns a symmetric brightness bucket.
+                index = round(pixel * (len(self.chars) - 1) / 255)
+                index = max(0, min(index, len(self.chars) - 1))
                 ascii_row.append(self.chars[index])
             
             ascii_image.append(ascii_row)

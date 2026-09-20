@@ -63,6 +63,7 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         self.assertEqual(self.generator.contrast, 1.0)
         self.assertEqual(self.generator.brightness, 1.0)
         self.assertEqual(self.generator.sharpness, 1.0)
+        self.assertEqual(self.generator.autocontrast, True)
         self.assertEqual(self.generator.dithering, False)
         self.assertEqual(self.generator.edge_enhance, False)
         self.assertEqual(self.generator.invert, False)
@@ -72,6 +73,7 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
             contrast=1.5,
             brightness=0.8,
             sharpness=1.2,
+            autocontrast=False,
             dithering=True,
             edge_enhance=True,
             invert=True
@@ -81,6 +83,7 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         self.assertEqual(self.generator.contrast, 1.5)
         self.assertEqual(self.generator.brightness, 0.8)
         self.assertEqual(self.generator.sharpness, 1.2)
+        self.assertEqual(self.generator.autocontrast, False)
         self.assertEqual(self.generator.dithering, True)
         self.assertEqual(self.generator.edge_enhance, True)
         self.assertEqual(self.generator.invert, True)
@@ -126,7 +129,7 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         ascii_art = self.generator.generate_from_image(self.test_image_path)
         
         # Check that we get a string with the expected dimensions
-        lines = ascii_art.strip().split("\n")
+        lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
         self.assertEqual(len(lines[0]), 10)  # 10 columns
 
