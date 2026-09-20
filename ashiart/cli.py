@@ -30,7 +30,7 @@ def build_parser():
     )
     parser.add_argument(
         "-c", "--chars",
-        help="Custom ASCII characters from darkest to lightest (e.g. '@#$%*+;:,.')"
+        help="Custom ASCII characters from darkest to lightest (e.g. '@#$%%*+;:,.')"
     )
     parser.add_argument(
         "-m", "--mode",

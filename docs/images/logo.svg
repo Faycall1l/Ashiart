@@ -11,15 +11,18 @@
   </defs>
   <rect x="0" y="0" width="640" height="180" rx="16" fill="url(#panel)"/>
   <rect x="0.75" y="0.75" width="638.5" height="178.5" rx="15.25" fill="none" stroke="#30363D" stroke-width="1.5"/>
-  <!-- Terminal glyph card -->
+  <!-- Terminal glyph card: shows the real brightness ramp, darkest to lightest -->
   <g>
     <rect x="28" y="28" width="124" height="124" rx="12" fill="#010409" stroke="#30363D" stroke-width="1.5"/>
     <circle cx="46" cy="46" r="4" fill="#FF5F56"/>
     <circle cx="60" cy="46" r="4" fill="#FEBC2E"/>
     <circle cx="74" cy="46" r="4" fill="#28C840"/>
-    <text x="44" y="82" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="28" font-weight="700" fill="url(#accent)">A@</text>
-    <text x="44" y="106" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#8B949E">#$%*+=</text>
-    <text x="44" y="124" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="13" fill="#58A6FF">;:,.. </text>
+    <title>Brightness ramp: @ # S % ? * + ; : , . (darkest to lightest)</title>
+    <!-- Hero glyph: "@" is index 0, the darkest character of the ramp -->
+    <text x="44" y="88" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="38" font-weight="700" fill="url(#accent)">@</text>
+    <!-- Full project ramp in exact code order, opacity fading dark to light -->
+    <text x="42" y="110" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" letter-spacing="1"><tspan fill="#F0F6FC" opacity="1.0">@</tspan><tspan fill="#E6EDF3" opacity="0.94">#</tspan><tspan fill="#D8E0E8" opacity="0.88">S</tspan><tspan fill="#C9D4DE" opacity="0.82">%</tspan><tspan fill="#B7C3CF" opacity="0.76">?</tspan><tspan fill="#A5B2BF" opacity="0.70">*</tspan><tspan fill="#93A1B0" opacity="0.64">+</tspan><tspan fill="#848F9E" opacity="0.58">;</tspan><tspan fill="#767F8D" opacity="0.52">:</tspan><tspan fill="#6E7681" opacity="0.46">,</tspan><tspan fill="#656D76" opacity="0.40">.</tspan></text>
+    <text x="42" y="128" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="9" fill="#6E7681">dark &#8594; light</text>
   </g>
   <!-- Wordmark -->
   <g>
