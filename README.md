@@ -79,6 +79,17 @@ for detail work. Dense mode (70 levels) renders it best — try:
 ashiart docs/images/owl-face.jpg --width 70 --mode dense
 ```
 
+Truecolor terminal output (`docs/images/puppy-head.jpg`, dense mode,
+`--color`), rendered here as an image since Markdown cannot show ANSI:
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/color-preview.png" width="630" alt="Truecolor ASCII art of a black puppy head" />
+</p>
+
+```bash
+ashiart docs/images/puppy-head.jpg --width 70 --mode dense --color
+```
+
 ## Features
 
 - Image-to-ASCII conversion with adjustable width and height
@@ -281,10 +292,12 @@ test/
   test_enhanced.py
   test_cli.py
 docs/images/
-  logo.svg         Project logo and brightness-ramp reference
-  sample.jpg       Sample input used in code snippets
-  puppy.jpg        High-contrast hero sample used in this README
-  owl-face.jpg     Tight face crop for high-detail demos
+  logo.svg           Project logo and brightness-ramp reference
+  sample.jpg         Sample input used in code snippets
+  puppy.jpg          High-contrast hero sample used in this README
+  puppy-head.jpg     Tight head crop for the color demo
+  owl-face.jpg       Tight face crop for high-detail demos
+  color-preview.png  Rendered truecolor preview shown above
 examples/
   basic_usage.py
   enhanced_demo.py
