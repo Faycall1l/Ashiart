@@ -43,29 +43,34 @@ that keep the original colors.
 
 Input formats are whatever Pillow supports, including JPEG and PNG.
 
-Sample output (`docs/images/puppy.jpg`, width 60, standard mode):
+Sample output (`docs/images/puppy.jpg`, width 60, standard mode with
+edge overlay — contours drawn from Sobel orientation):
 
 ```text
 %%*??*+++;::,.,. .     .,:, . ..,,,.....,,,.:;:;;;+*???%%S##
-%?*++;;::,::,...,;+****??%?*+;,    .:*%%+,:;+;::;;:::;+**?%%
-?*+;;;::,,,,.,?#@@@@@@@@@@@@@@#?:;*S@@S+,::;;*;++;++;;++***?
-**+;::,     ,%@@@@@@#@@####S##@@@@@@#SSS%?*;::+*;:::;+***??%
-;;:,,...   :#@@@@@@######%##SSS@@@@@###@@@@@S;,:,,::;++*+**?
-*+;;;;:::,,#@@@@@####S##S#@S%%SSSS###@@@@#@@@%,,,:;;;;;;+***
-%*++;;:,, ;@@@@@##S#SSS%SS##%%%%%SSSS#@@@@@@#*:;;;;;;+;+;+**
-*+++;,,,, *@@@@@####S###%S#@S%S@#S@S##%#@@@@S;;:::;::::;:;+?
-+:;::,..,.:#@@@@#SS###S#S#@@S%+%#SS%S#SS@@@#S+;;:;;++;;;:;;+
-;:,,,....  ?@##@##SS##%SSS@#@S+?%S%S#@@@@@#*******+?*****??*
-:::::,..   .?@###@####S#@#@@#@SS%%SS##@@@?*+***+++++*+****?%
-;;;::,,...,..%@####@###S#@@@@#@#%S#SS##@#?**++++;;;;+***?%%%
-?*;,,,..,,.,. *#@@@@#S#########S%S?%S##@@S%?*+*+++++++*????%
-;;;::::::,,....,;+?%%%%%#####@#%??%#@#@@#+++++*+**+****????%
-;:::,,,:,.,,....     ;SSSSSS#@@@######S%*:;:;++++****????%??
-*+**+;:,,,.,.,,,,.... :###@#@#@@##@@@@?:,:,:;;;;;;+;*?++%SSS
-????*+;::;:,,,,,,,,... :SS#@@@@#?*?S%*+:::::;+;;+*%%%%?%%SSS
-S%%%?**+**++;;:::,,,,,:,;##@@@@#;,. ..,,,,,:::;+***??%%%%%S#
-SS%%???*++++;;:;;::,,:::,%@#@@@S, ,.,,,,,,,:,,:;+**?%%%%SSS#
+%?*++;;::,::,..----------------/   ----%+,:;+;::;;:::;+**?%%
+?*+;;;::,,,,.\\---@@@@@@@@@@@--------@S+,::;;*;++;++;;++***?
+**+;::,     \\@@@@@@#@@####S##@@--@@#SS-----::+*;:::;+***??%
+;;:,,...   \\@@@@@@######%##SSS@@@@@###@@@@-//,:,,::;++*+**?
+*+;;;;:::,\\@@@@@####S##S#@S%%SSSS###@@@@#@@@|,,,:;;;;;;+***
+%*++;;:,, ||@@@@##S#SSS%SS##%%%%%SSSS#@@@@@@#|:;;;;;;+;+;+**
+*+++;,,,, ||@@@@####S###%S#@S%S@#S@S##%#@@@@||;:::;::::;:;+?
++:;::,..,.//@@@@#SS###S#S#@@S%+%#SS%S#SS@@@#S+;;:;;++;;;:;;+
+;:,,,.... ///##@##SS##%SSS@#@S+?%S%S#@@@@@\*******+?*****??*
+:::::,..   //@###@####S#@#@@#@SS%%SS##@@@?*+***+++++*+****?%
+;;;::,,...,.///####@###S#@@@@#@#%S#SS##@#?**++++;;;;+***?%%%
+?*;,,,..,,.,.//--@@@#S#########S%S?%S##@@S%?*+*+++++++*????%
+;;;::::::,,....-------%%#####@#%??%#@#@@\\++++*+**+****????%
+;:::,,,:,.,,....  ---//SSSSS#@@@######S\\:;:;++++****????%??
+*+**+;:,,,.,.,,,,.... //##@#@#@@##@@@@\\,:,:;;;;;;+;*?++%SSS
+????*+;::;:,,,,,,,,... //S#@@@@#\-----\:::::;+;;+*%%%%?%%SSS
+S%%%?**+**++;;:::,,,,,:,//#@@@@|\,---.,,,,,:::;+***??%%%%%S#
+SS%%???*++++;;:;;::,,:::,/@#@@@\| ,.,,,,,,,:,,:;+**?%%%%SSS#
 SSS%%??****++;+;;;;::::::;*?%%?;;::;;;++;;+++++**??%SSSSSS##
+```
+
+```bash
+ashiart docs/images/puppy.jpg --width 60 --edges --edge-threshold 0.5
 ```
 
 Photo: black puppy via Lorem Picsum (id 237, Unsplash license).
@@ -180,6 +185,8 @@ print(art)
 | `--brightness` | `1.0` | Brightness multiplier |
 | `--sharpness` | `1.0` | Sharpness multiplier |
 | `--edge-enhance` | off | Enhance edges before mapping |
+| `--edges` | off | Overlay directional edge glyphs on contours |
+| `--edge-threshold` | `0.35` | Normalized edge strength gate for `--edges` |
 | `--no-autocontrast` | off | Disable automatic level stretching |
 | `--dithering` | off | Apply dithering for texture |
 | `--invert` | off | Invert brightness mapping |
@@ -213,7 +220,7 @@ Enhanced generator:
 ```python
 from ashiart import (
     EnhancedAsciiArtGenerator,
-    image_to_enhanced_ascii,
+    image_to_ascii,
     image_to_html_ascii,
 )
 
@@ -232,8 +239,8 @@ html = generator.generate_html(
 )
 generator.save_html_to_file(html, "output.html")
 
-# Convenience functions
-art = image_to_enhanced_ascii(
+# Convenience functions (single text entry point + HTML)
+art = image_to_ascii(
     "docs/images/sample.jpg",
     width=80,
     mode="dense",

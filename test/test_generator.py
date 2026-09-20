@@ -6,7 +6,8 @@ from unittest.mock import patch, MagicMock
 from PIL import Image, ImageDraw
 import tempfile
 
-from ashiart.generator import AsciiArtGenerator, image_to_ascii
+from ashiart.generator import AsciiArtGenerator
+from ashiart import image_to_ascii
 
 
 class TestAsciiArtGenerator(unittest.TestCase):

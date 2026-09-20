@@ -13,12 +13,9 @@ class EnhancedAsciiArtGenerator:
     # paper white, matching the canonical density ramps)
     ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
     
-    # High-density character set (70 shades)
-    DENSE_CHARS = ["$", "@", "B", "%", "8", "&", "W", "M", "#", "*", "o", "a", "h", "k", 
-                   "b", "d", "p", "q", "w", "m", "Z", "O", "0", "Q", "L", "C", "J", "U", 
-                   "Y", "X", "z", "c", "v", "u", "n", "x", "r", "j", "f", "t", "/", "\\", 
-                   "|", "(", ")", "1", "{", "}", "[", "]", "?", "-", "_", "+", "~", "<", 
-                   ">", "i", "!", "l", "I", ";", ":", "\"", "^", "`", "'", ".", " "]
+    # High-density character set, ordered by measured ink coverage
+    # (darkest to lightest) so each step is a true tonal increase
+    DENSE_CHARS = list('MW@%$BmwQ8O&0bdpqUChXkoaZ#nuYcxLzvJ?f1jtl[]{}Ir|!><(^*i/)+\\";~:_\'-.` ')
     
     # Unicode block characters for higher resolution
     BLOCK_CHARS = ["█", "▓", "▒", "░", " "]
@@ -62,11 +59,13 @@ class EnhancedAsciiArtGenerator:
         self.autocontrast = True
         self.dithering = False
         self.edge_enhance = False
+        self.edges = False
+        self.edge_threshold = 0.35
         self.invert = False
 
     def set_enhancement(self, contrast=None, brightness=None, sharpness=None, 
                         autocontrast=None, dithering=None, edge_enhance=None,
-                        invert=None):
+                        edges=None, edge_threshold=None, invert=None):
         """
         Set image enhancement parameters.
         
@@ -78,6 +77,10 @@ class EnhancedAsciiArtGenerator:
                 ramp before mapping.
             dithering (bool, optional): Whether to apply dithering.
             edge_enhance (bool, optional): Whether to enhance edges.
+            edges (bool, optional): Overlay directional edge glyphs
+                (Sobel orientation) on strong contours.
+            edge_threshold (float, optional): Normalized Sobel magnitude
+                (0-1) above which a cell becomes an edge glyph.
             invert (bool, optional): Whether to invert the image.
         """
         if contrast is not None:
@@ -92,6 +95,10 @@ class EnhancedAsciiArtGenerator:
             self.dithering = dithering
         if edge_enhance is not None:
             self.edge_enhance = edge_enhance
+        if edges is not None:
+            self.edges = edges
+        if edge_threshold is not None:
+            self.edge_threshold = edge_threshold
         if invert is not None:
             self.invert = invert
 
@@ -161,6 +168,62 @@ class EnhancedAsciiArtGenerator:
         if self.autocontrast:
             gray = ImageOps.autocontrast(gray, cutoff=1)
         return gray
+
+    def _compute_edge_grid(self, grayscale_image):
+        """
+        Sobel edge-orientation grid for the char cells.
+
+        Cells whose normalized gradient magnitude reaches
+        ``edge_threshold`` get a directional glyph (``- / | \\``)
+        matching the contour direction; other cells get None and keep
+        their density character. Returns None when edge overlay is
+        disabled, in braille mode, or on degenerate sizes.
+        """
+        if not self.edges or self.mode == "braille":
+            return None
+        a = np.asarray(grayscale_image, dtype=np.float64)
+        if a.shape[0] < 3 or a.shape[1] < 3:
+            return None
+
+        gx = (a[:-2, 2:] + 2 * a[1:-1, 2:] + a[2:, 2:]
+              - a[:-2, :-2] - 2 * a[1:-1, :-2] - a[2:, :-2])
+        gy = (a[2:, :-2] + 2 * a[2:, 1:-1] + a[2:, 2:]
+              - a[:-2, :-2] - 2 * a[:-2, 1:-1] - a[:-2, 2:])
+        mag = np.pad(np.hypot(gx, gy), 1)
+        peak = mag.max()
+        if peak == 0:
+            return None
+        norm = mag / peak
+        # Gradient is perpendicular to the contour: rotate 90 degrees,
+        # fold into [0, 180), then snap to the nearest glyph axis.
+        ang = np.pad((np.degrees(np.arctan2(gy, gx)) + 90.0) % 180.0, 1)
+
+        grid = []
+        for y in range(a.shape[0]):
+            row = []
+            for x in range(a.shape[1]):
+                if norm[y, x] >= self.edge_threshold:
+                    t = ang[y, x]
+                    if t < 22.5 or t >= 157.5:
+                        row.append("-")
+                    elif t < 67.5:
+                        row.append("/")
+                    elif t < 112.5:
+                        row.append("|")
+                    else:
+                        row.append("\\")
+                else:
+                    row.append(None)
+            grid.append(row)
+        return grid
+
+    @staticmethod
+    def _overlay_edges(ascii_image, edge_grid):
+        """Substitute edge glyphs where the edge grid is set."""
+        if edge_grid is None:
+            return ascii_image
+        return [[e if e is not None else c for c, e in zip(arow, erow)]
+                for arow, erow in zip(ascii_image, edge_grid)]
 
     def _apply_dithering(self, image):
         """
@@ -303,11 +366,13 @@ class EnhancedAsciiArtGenerator:
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
+        edge_grid = self._compute_edge_grid(grayscale_image)
         
         if self.dithering:
             grayscale_image = self._apply_dithering(grayscale_image)
         
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
+        ascii_image = self._overlay_edges(ascii_image, edge_grid)
         
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
@@ -330,11 +395,13 @@ class EnhancedAsciiArtGenerator:
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
+        edge_grid = self._compute_edge_grid(grayscale_image)
         
         if self.dithering:
             grayscale_image = self._apply_dithering(grayscale_image)
         
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
+        ascii_image = self._overlay_edges(ascii_image, edge_grid)
         
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
@@ -355,10 +422,12 @@ class EnhancedAsciiArtGenerator:
         resized = self._resize_image(image.convert("RGB"))
         enhanced = self._enhance_image(resized)
         grayscale = self._convert_to_grayscale(enhanced)
+        edge_grid = self._compute_edge_grid(grayscale)
         if self.dithering:
             grayscale = self._apply_dithering(grayscale)
 
         ascii_image = self._map_pixels_to_ascii(grayscale)
+        ascii_image = self._overlay_edges(ascii_image, edge_grid)
         color_arr = np.array(enhanced)
 
         lines = []
@@ -410,6 +479,7 @@ class EnhancedAsciiArtGenerator:
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
+        edge_grid = self._compute_edge_grid(grayscale_image)
         
         if self.dithering:
             grayscale_image = self._apply_dithering(grayscale_image)
@@ -452,10 +522,13 @@ class EnhancedAsciiArtGenerator:
         
         for y in range(height):
             for x in range(width):
-                pixel_value = gray_pixels[y, x]
-                index = round(pixel_value * (len(self.chars) - 1) / 255)
-                index = max(0, min(index, len(self.chars) - 1))
-                char = self.chars[index]
+                if edge_grid is not None and edge_grid[y][x] is not None:
+                    char = edge_grid[y][x]
+                else:
+                    pixel_value = gray_pixels[y, x]
+                    index = round(pixel_value * (len(self.chars) - 1) / 255)
+                    index = max(0, min(index, len(self.chars) - 1))
+                    char = self.chars[index]
                 
                 if preserve_color and len(color_pixels.shape) > 2:
                     # Get the RGB color for this pixel
@@ -497,12 +570,13 @@ class EnhancedAsciiArtGenerator:
 
 
 # Convenience functions
-def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard", 
-                          contrast=1.0, brightness=1.0, sharpness=1.0, 
-                          autocontrast=True, dithering=False, edge_enhance=False,
-                          invert=False, ansi=False):
+def image_to_ascii(image_path, width=100, height=None, mode="standard",
+                   chars=None, contrast=1.0, brightness=1.0, sharpness=1.0,
+                   autocontrast=True, dithering=False, edge_enhance=False,
+                   edges=False, edge_threshold=0.35,
+                   invert=False, ansi=False):
     """
-    Convenience function to convert an image to enhanced ASCII art.
+    Convert an image to ASCII art (single entry point).
     
     Args:
         image_path (str): Path to the image file.
@@ -510,23 +584,28 @@ def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard",
         height (int, optional): Height of output ASCII art. Defaults to None.
         mode (str, optional): Rendering mode. Options: "standard", "dense", 
                              "blocks", "braille". Defaults to "standard".
+        chars (list, optional): Custom characters, darkest to lightest.
         contrast (float, optional): Contrast adjustment (1.0 is neutral).
         brightness (float, optional): Brightness adjustment (1.0 is neutral).
         sharpness (float, optional): Sharpness adjustment (1.0 is neutral).
         autocontrast (bool, optional): Stretch gray levels to the full ramp.
         dithering (bool, optional): Whether to apply dithering.
         edge_enhance (bool, optional): Whether to enhance edges.
+        edges (bool, optional): Overlay directional edge glyphs on contours.
+        edge_threshold (float, optional): Normalized Sobel magnitude gate.
         invert (bool, optional): Whether to invert the image.
         ansi (bool, optional): Wrap output in ANSI truecolor codes.
         
     Returns:
         str: ASCII art as a string.
     """
-    generator = EnhancedAsciiArtGenerator(width=width, height=height, mode=mode)
+    generator = EnhancedAsciiArtGenerator(chars=chars, width=width,
+                                        height=height, mode=mode)
     generator.set_enhancement(contrast=contrast, brightness=brightness, 
                             sharpness=sharpness, autocontrast=autocontrast,
                             dithering=dithering, 
-                            edge_enhance=edge_enhance, invert=invert)
+                            edge_enhance=edge_enhance, edges=edges,
+                            edge_threshold=edge_threshold, invert=invert)
     return generator.generate_from_image(image_path, ansi=ansi)
 
 

@@ -5,6 +5,24 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
+  contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);
+  works in text, ANSI, and HTML paths (not braille)
+
+### Changed
+
+- Dense ramp reordered by measured glyph ink coverage (32 tonal
+  inversions removed)
+- CLI reference and README hero updated for edge overlay
+
+### Removed
+
+- `image_to_enhanced_ascii` and the baseline `generator.image_to_ascii`:
+  a single `image_to_ascii()` entry point covers all modes and options
+  (old names have no shim; update imports)
+
 ## [0.2.0] - 2026-09-20
 
 ### Added
