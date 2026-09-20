@@ -28,6 +28,7 @@
 - [Python API](#python-api)
 - [Rendering modes](#rendering-modes)
 - [Character ramp](#character-ramp)
+- [How it works](#how-it-works)
 - [Examples](#examples)
 - [Project structure](#project-structure)
 - [Development](#development)
@@ -36,12 +37,12 @@
 
 ## Overview
 
-AshiArt maps image brightness to characters so pictures remain recognizable
-as text. It is aimed at developers and artists who want fast previews in the
-terminal, stylized text output for documents, and shareable HTML renderings
-that keep the original colors.
+AshiArt converts images to character grids for terminals, plain-text
+documents, and color-preserving HTML pages. Each output cell encodes the
+brightness — and optionally the contour direction — of its source pixels.
 
-Input formats are whatever Pillow supports, including JPEG and PNG.
+Decodes any image format Pillow supports, including JPEG, PNG, BMP, GIF,
+and WebP.
 
 Sample output (`docs/images/puppy.jpg`, width 60, standard mode with
 edge overlay — contours drawn from Sobel orientation):
@@ -74,11 +75,11 @@ ashiart docs/images/puppy.jpg --width 60 --edges --edge-threshold 0.5
 ```
 
 Photo: black puppy via Lorem Picsum (id 237, Unsplash license).
-The dark coat against the light planks is exactly the high-contrast,
-single-subject input ASCII renders best from.
+A dark, single-subject coat against light planks is the input profile
+ASCII renders most faithfully: high contrast, one subject, clean edges.
 
-The owl close-up (`docs/images/owl-face.jpg`, width 70) is a second demo
-for detail work. Dense mode (70 levels) renders it best — try:
+The owl close-up (`docs/images/owl-face.jpg`, width 70) exercises fine
+detail instead. Dense mode (69 levels) renders it best — try:
 
 ```bash
 ashiart docs/images/owl-face.jpg --width 70 --mode dense
@@ -97,13 +98,14 @@ ashiart docs/images/puppy-head.jpg --width 70 --mode dense --color
 
 ## Features
 
-- Image-to-ASCII conversion with adjustable width and height
+- Image-to-ASCII conversion with explicit width, or proportional height
 - Four rendering modes: standard, dense, blocks, braille
-- ANSI truecolor terminal output sampled from the source image
+- Sobel edge overlay: strong contours drawn as directional `- / | \` glyphs
+- ANSI truecolor terminal output, per-cell color sampled after enhancement
 - Color-preserving HTML export with configurable font size
-- Image controls: contrast, brightness, sharpness, autocontrast,
-  edge enhancement, dithering, and inversion
-- Custom character ramps ordered from darkest to lightest
+- Tonal controls: contrast, brightness, sharpness, autocontrast
+  (level stretching, on by default), dithering, inversion
+- Custom character ramps, ordered darkest to lightest
 - Command-line interface and importable Python API
 - Cross-platform: macOS, Linux, and Windows
 
@@ -184,9 +186,9 @@ print(art)
 | `--contrast` | `1.0` | Contrast multiplier |
 | `--brightness` | `1.0` | Brightness multiplier |
 | `--sharpness` | `1.0` | Sharpness multiplier |
-| `--edge-enhance` | off | Enhance edges before mapping |
-| `--edges` | off | Overlay directional edge glyphs on contours |
-| `--edge-threshold` | `0.35` | Normalized edge strength gate for `--edges` |
+| `--edge-enhance` | off | PIL edge-enhancement filter before mapping |
+| `--edges` | off | Sobel overlay: contours as `- / | \` glyphs |
+| `--edge-threshold` | `0.35` | Normalized Sobel magnitude gate for `--edges` |
 | `--no-autocontrast` | off | Disable automatic level stretching |
 | `--dithering` | off | Apply dithering for texture |
 | `--invert` | off | Invert brightness mapping |
@@ -254,10 +256,10 @@ html = image_to_html_ascii("docs/images/sample.jpg", width=80)
 
 | Mode | Character set | Best for |
 | --- | --- | --- |
-| `standard` | 12-level ASCII ramp | Clean, readable terminal output |
-| `dense` | 70+ characters | Smoother gradients and detail |
-| `blocks` | Unicode block elements | High-contrast geometric look |
-| `braille` | Unicode braille patterns | Higher effective resolution |
+| `standard` | 12-level ASCII ramp | Legible terminal output |
+| `dense` | 69-level measured ramp | Smooth gradients, photographic detail |
+| `blocks` | 5-level block ramp (`█▓▒░ `) | High-contrast geometric look |
+| `braille` | 256 dot patterns, 2×4 dots per cell | ~4× effective resolution |
 
 ## Character ramp
 
@@ -275,6 +277,39 @@ Custom ramps must preserve that ordering, for example:
 ashiart input.jpg --chars "@%*+=-:. "
 ```
 
+## How it works
+
+Each output cell corresponds to exactly one resized pixel (braille packs
+a 2×4 block per cell). The pipeline, in order:
+
+1. **Resample.** LANCZOS downscale to `width` columns. Rows default to
+   `height × width / image_width × 0.5`, compensating the ~2:1
+   height-to-width ratio of monospace glyphs; `--height` overrides it.
+2. **Enhance.** Contrast, brightness, and sharpness multipliers, then an
+   edge-enhancement filter and optional inversion. All default to neutral.
+3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
+   default, stretches the used range to 0–255 with a 1% cutoff so the
+   full ramp is exercised.
+4. **Edge field (optional, `--edges`).** 3×3 Sobel gradients per cell,
+   magnitude normalized by the frame peak. Cells at or above
+   `--edge-threshold` (default 0.35) take a contour glyph from the
+   gradient direction rotated 90° and folded into [0°, 180°):
+
+   | Contour direction | Glyph | Angle range |
+   | --- | --- | --- |
+   | Horizontal | `-` | [0°, 22.5°) ∪ [157.5°, 180°) |
+   | Diagonal | `/` | [22.5°, 67.5°) |
+   | Vertical | `\|` | [67.5°, 112.5°) |
+   | Diagonal | `\` | [112.5°, 157.5°) |
+
+   Remaining cells keep their tonal character. Skipped in braille mode.
+5. **Map.** `index = round(L / 255 × (N−1))`, clamped to the ramp.
+   Rounding (not truncation) gives every character a symmetric
+   brightness bucket. Braille cells threshold each of their 8 dots
+   at 128 instead.
+6. **Emit.** Plain text, ANSI truecolor foreground per cell, or HTML
+   `<span>` elements preserving the enhanced per-cell color.
+
 ## Examples
 
 - `examples/basic_usage.py`: minimal conversion and custom ramps
@@ -290,10 +325,10 @@ python examples/basic_usage.py docs/images/sample.jpg
 
 ```text
 ashiart/
-  __init__.py      Public package exports
-  generator.py     Baseline ASCII generator with ANSI support
-  enhanced.py      Modes, enhancements, HTML, and ANSI support
-  cli.py           Command-line interface
+  __init__.py      Public exports: generators, image_to_ascii, HTML helper
+  generator.py     NumPy-free single-ramp converter with ANSI support
+  enhanced.py      Modes, enhancements, Sobel edge overlay, HTML, ANSI
+  cli.py           Command-line interface (all flags in one parser)
 test/
   test_generator.py
   test_enhanced.py

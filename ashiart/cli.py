@@ -45,7 +45,7 @@ def build_parser():
     parser.add_argument("--sharpness", type=float, default=1.0,
                         help="Sharpness adjustment, 1.0 is neutral (default: 1.0)")
     parser.add_argument("--edge-enhance", action="store_true",
-                        help="Enhance edges before mapping")
+                        help="PIL edge-enhancement filter before mapping")
     parser.add_argument("--edges", action="store_true",
                         help="Overlay directional edge glyphs (- / | \\) on contours")
     parser.add_argument("--edge-threshold", type=float, default=0.35,

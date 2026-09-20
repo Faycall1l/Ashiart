@@ -26,8 +26,13 @@ python basic_usage.py path/to/image.jpg
 python enhanced_demo.py path/to/image.jpg
 ```
 
-If you run the examples without providing an image path, most examples will generate a test image automatically.
+If you run `basic_usage.py` without an image path, it generates a test
+image automatically. `enhanced_demo.py` requires an image path argument.
 
 ## Example Output
 
-The examples save their output to various files, which you can examine to see the different ASCII art styles and options. The enhanced demo in particular creates a `demo_outputs` directory with various formats and styles to explore. 
+`basic_usage.py` prints to stdout and writes `output.txt`.
+`enhanced_demo.py` writes a `demo_outputs/` directory: one text file per
+rendering mode and enhancement combination (`demo_standard*.txt`,
+`demo_dense.txt`, `demo_blocks.txt`, `demo_braille.txt`) plus
+color-preserving HTML renders (`demo_color*.html`). 

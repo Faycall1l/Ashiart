@@ -1,21 +1,21 @@
 # Documentation for AshiArt
 
-This directory contains documentation and sample images for the AshiArt package.
+This directory holds the image assets referenced by the main README.
 
-## Sample Images
+## Images
 
-The `images/example.jpg` and `images/sample.jpg` files are used in the main README to showcase the ASCII art generator.
+- `images/logo.svg` — project logo; the terminal card shows the
+  brightness ramp darkest to lightest
+- `images/sample.jpg` / `images/example.jpg` — owl photo used across
+  code snippets and API examples
+- `images/puppy.jpg` — high-contrast hero sample in the main README
+- `images/puppy-head.jpg` — tight crop feeding the truecolor demo
+- `images/owl-face.jpg` — tight crop for dense-mode detail demos
+- `images/color-preview.png` — rendered truecolor output shown in
+  the main README (Markdown cannot display ANSI escapes)
 
-## Adding Documentation
+`sample.jpg` and `example.jpg` are byte-identical; both names are kept
+because existing snippets and examples reference each path.
 
-If you'd like to contribute documentation:
-
-1. Create Markdown files in this directory
-2. Add any necessary images or assets
-3. Link to them from the main README or other documentation files
-
-## Documentation Structure
-
-- **User Guide**: Basic usage and examples
-- **API Reference**: Detailed documentation of all classes and functions
-- **Examples**: More complex usage examples and tutorials 
+Photo credits: owl photo from the original project import;
+puppy via Lorem Picsum (id 237, Unsplash license).
