@@ -11,7 +11,7 @@
 
 <p align="center">
   <a href="https://pypi.org/project/ashiart/"><img src="https://img.shields.io/pypi/v/ashiart" alt="PyPI version" /></a>
-  <img src="https://img.shields.io/badge/python-3.7%2B-blue" alt="Python 3.7+" />
+  <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+" />
   <a href="https://github.com/Faycall1l/Ashiart/actions"><img src="https://github.com/Faycall1l/Ashiart/actions/workflows/python-package.yml/badge.svg" alt="Build status" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platform support" />
@@ -78,7 +78,7 @@ SSS###########SSSSSSSS############SS##S##S#S##SSSSSS####SS##
 
 ## Requirements
 
-- Python 3.7 or newer
+- Python 3.8 or newer
 - Pillow 10 or newer
 - NumPy 1.20 or newer
 
@@ -280,7 +280,7 @@ pip install -e .
 pytest
 ```
 
-Continuous integration runs `pytest` on Python 3.7 through 3.11 for pushes
+Continuous integration runs `pytest` on Python 3.8 through 3.11 for pushes
 and pull requests to `main`.
 
 ## Contributing
