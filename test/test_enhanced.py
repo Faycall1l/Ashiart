@@ -7,7 +7,7 @@ from unittest.mock import patch, MagicMock
 import numpy as np
 from PIL import Image, ImageDraw
 
-from ashiart.enhanced import EnhancedAsciiArtGenerator, image_to_enhanced_ascii, image_to_html_ascii
+from ashiart.enhanced import EnhancedAsciiArtGenerator, image_to_ascii, image_to_html_ascii
 
 
 class TestEnhancedAsciiArtGenerator(unittest.TestCase):
@@ -160,8 +160,8 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
 
     def test_convenience_functions(self):
         """Test convenience functions."""
-        # Test image_to_enhanced_ascii
-        ascii_art = image_to_enhanced_ascii(
+        # Test image_to_ascii
+        ascii_art = image_to_ascii(
             self.test_image_path,
             width=10,
             mode="dense",
@@ -181,6 +181,62 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         # Check that we get a string with HTML
         self.assertIsInstance(html, str)
         self.assertIn("<!DOCTYPE html>", html)
+
+    def test_superseded_helpers_removed(self):
+        """A single image_to_ascii entry point; fossils stay deleted."""
+        import ashiart.generator
+        import ashiart.enhanced
+        self.assertFalse(hasattr(ashiart.generator, "image_to_ascii"))
+        self.assertFalse(hasattr(ashiart.enhanced, "image_to_enhanced_ascii"))
+        self.assertTrue(callable(image_to_ascii))
+
+    def test_dense_ramp_is_monotonic(self):
+        """Dense ramp must be ordered by measured ink (darkest first)."""
+        from PIL import Image as PILImage, ImageDraw, ImageFont
+        font = ImageFont.load_default(size=36)
+
+        def ink(ch):
+            img = PILImage.new("L", (60, 60), 255)
+            d = ImageDraw.Draw(img)
+            d.text((5, 5), ch, font=font, fill=0)
+            px = list(img.getdata())
+            return sum(1 for v in px if v < 128) / len(px)
+
+        cov = [ink(ch) for ch in EnhancedAsciiArtGenerator.DENSE_CHARS]
+        self.assertTrue(
+            all(a >= b for a, b in zip(cov, cov[1:])),
+            "DENSE_CHARS has tonal inversions",
+        )
+        self.assertEqual(EnhancedAsciiArtGenerator.DENSE_CHARS[-1], " ")
+
+    def test_edge_grid_disabled_by_default(self):
+        """No edge overlay unless explicitly enabled."""
+        gray = self.generator._convert_to_grayscale(self.test_image)
+        self.assertIsNone(self.generator._compute_edge_grid(gray))
+
+    def test_edge_grid_vertical_split(self):
+        """A vertical black/white split must yield '|' edge glyphs."""
+        import numpy as np
+        from PIL import Image as PILImage
+        arr = np.zeros((8, 8), dtype=np.uint8)
+        arr[:, 4:] = 255
+        img = PILImage.fromarray(arr, mode="L")
+        gen = EnhancedAsciiArtGenerator(width=8, height=8)
+        gen.set_enhancement(edges=True, edge_threshold=0.2, autocontrast=False)
+        grid = gen._compute_edge_grid(img)
+        glyphs = {c for row in grid for c in row if c is not None}
+        self.assertIn("|", glyphs)
+        self.assertNotIn("/", glyphs)
+        self.assertNotIn("\\", glyphs)
+
+    def test_edge_overlay_keeps_dimensions(self):
+        """Edge overlay must not change output geometry."""
+        gen = EnhancedAsciiArtGenerator(width=10, height=5)
+        gen.set_enhancement(edges=True)
+        art = gen.generate_from_image(self.test_image_path)
+        lines = art.strip("\n").split("\n")
+        self.assertEqual(len(lines), 5)
+        self.assertTrue(all(len(line) == 10 for line in lines))
 
 
 if __name__ == "__main__":

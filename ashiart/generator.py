@@ -184,21 +184,3 @@ class AsciiArtGenerator:
         """
         with open(output_path, "w") as file:
             file.write(ascii_art)
-
-
-def image_to_ascii(image_path, width=100, height=None, chars=None):
-    """
-    Convenience function to convert an image to ASCII art.
-    
-    Args:
-        image_path (str): Path to the image file.
-        width (int, optional): Width of output ASCII art. Defaults to 100.
-        height (int, optional): Height of output ASCII art. Defaults to None.
-        chars (list, optional): ASCII characters from darkest to lightest. 
-                               Defaults to None.
-        
-    Returns:
-        str: ASCII art as a string.
-    """
-    generator = AsciiArtGenerator(chars=chars, width=width, height=height)
-    return generator.generate_from_image(image_path) 

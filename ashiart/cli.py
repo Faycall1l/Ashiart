@@ -46,6 +46,10 @@ def build_parser():
                         help="Sharpness adjustment, 1.0 is neutral (default: 1.0)")
     parser.add_argument("--edge-enhance", action="store_true",
                         help="Enhance edges before mapping")
+    parser.add_argument("--edges", action="store_true",
+                        help="Overlay directional edge glyphs (- / | \\) on contours")
+    parser.add_argument("--edge-threshold", type=float, default=0.35,
+                        help="Normalized edge strength for --edges (default: 0.35)")
     parser.add_argument("--no-autocontrast", action="store_true",
                         help="Disable automatic level stretching")
     parser.add_argument("--dithering", action="store_true",
@@ -81,6 +85,8 @@ def main(argv=None):
         autocontrast=not args.no_autocontrast,
         dithering=args.dithering,
         edge_enhance=args.edge_enhance,
+        edges=args.edges,
+        edge_threshold=args.edge_threshold,
         invert=args.invert,
     )
 
