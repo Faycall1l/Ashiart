@@ -43,33 +43,37 @@ that keep the original colors.
 
 Input formats are whatever Pillow supports, including JPEG and PNG.
 
-Sample output (`docs/images/sample.jpg`, width 60, standard mode):
+Sample output (`docs/images/puppy.jpg`, width 60, standard mode):
 
 ```text
-SSSSS%*++++;;+?%SSSSSSSSS%*;::;+*+.    ,?SS###SSSSSSSSSSSSS#
-S####SS%???**?%%%%%%SS%%%???**??%?:    ,%####SSSSSSSSSSSSSSS
-###########SSSSS%%%%%??*?*++;::::::,.  ;S@##SSSSSS###S##SSSS
-#######SSS#SSSSSS??%%%?;;;;+?%%**?***++;+?S##############SSS
-############SSS%*%?+:,.....,,;**??*%S##?%?**S@##SSS#####SSSS
-###############*?+:+**+:::.,:,::,.::,:;,:*%S?%#SS%%S####SSSS
-#############@?+:+S@@@@S?**;:,::,,,;+;;+;:,;?+SSSSSSSS######
-#####@@@##@@@S::+S#@@##@@@@?:,:;,,+S####@#%*:;?SSSS#########
-############@*::+?%%@@@@@@#*:,;:,,%@@##@@@@#*:+%SSSS########
-#####@######@;;;:**?S#@@@@%:,;%+;;S@@@@@S%S?:+++#SS#########
-#####@@@@#@##:;%+:+++++*%?+,,+@?::S@###S?**+:*++############
-#######@#####;:%@+:::,,:;:,,,?%;,:*??+;;+*++??++%#S#########
-S###########@%;*S@: .,,:;+;,::;:;*+::,::::??*+*??###########
-###########@@@*++%%:  .:+??+::;+?*+:,. .+?%++*%%?%@@@#######
-#############@%?*+%S?:..,;*%????*;,.. :%#?++*S#SS?@@@@######
-##############?*%**?%SS+:,,;??+;::::+%S?**?++S#S%?@@@@@#####
-##############?+++*%??%SS%*;?*;+*%SSSS??%%??*%@S?%#@##@@@###
-##############%*?**?*?%SSS#SS#S##SSS%%%%%?%S%%S#%%S#########
-SSS##@@@######%%%%%%%SSSSSSS##SSSSSSSSS%SSSSSSSSSS%%########
-SSS#####SSSS##SSSS%SSSSS#S#SSS#S##SS#SS##S#S##%%SSSSSS#SSSS#
+%%*??*+++;::,.,. .     .,:, . ..,,,.....,,,.:;:;;;+*???%%S##
+%?*++;;::,::,...,;+****??%?*+;,    .:*%%+,:;+;::;;:::;+**?%%
+?*+;;;::,,,,.,?#@@@@@@@@@@@@@@#?:;*S@@S+,::;;*;++;++;;++***?
+**+;::,     ,%@@@@@@#@@####S##@@@@@@#SSS%?*;::+*;:::;+***??%
+;;:,,...   :#@@@@@@######%##SSS@@@@@###@@@@@S;,:,,::;++*+**?
+*+;;;;:::,,#@@@@@####S##S#@S%%SSSS###@@@@#@@@%,,,:;;;;;;+***
+%*++;;:,, ;@@@@@##S#SSS%SS##%%%%%SSSS#@@@@@@#*:;;;;;;+;+;+**
+*+++;,,,, *@@@@@####S###%S#@S%S@#S@S##%#@@@@S;;:::;::::;:;+?
++:;::,..,.:#@@@@#SS###S#S#@@S%+%#SS%S#SS@@@#S+;;:;;++;;;:;;+
+;:,,,....  ?@##@##SS##%SSS@#@S+?%S%S#@@@@@#*******+?*****??*
+:::::,..   .?@###@####S#@#@@#@SS%%SS##@@@?*+***+++++*+****?%
+;;;::,,...,..%@####@###S#@@@@#@#%S#SS##@#?**++++;;;;+***?%%%
+?*;,,,..,,.,. *#@@@@#S#########S%S?%S##@@S%?*+*+++++++*????%
+;;;::::::,,....,;+?%%%%%#####@#%??%#@#@@#+++++*+**+****????%
+;:::,,,:,.,,....     ;SSSSSS#@@@######S%*:;:;++++****????%??
+*+**+;:,,,.,.,,,,.... :###@#@#@@##@@@@?:,:,:;;;;;;+;*?++%SSS
+????*+;::;:,,,,,,,,... :SS#@@@@#?*?S%*+:::::;+;;+*%%%%?%%SSS
+S%%%?**+**++;;:::,,,,,:,;##@@@@#;,. ..,,,,,:::;+***??%%%%%S#
+SS%%???*++++;;:;;::,,:::,%@#@@@S, ,.,,,,,,,:,,:;+**?%%%%SSS#
+SSS%%??****++;+;;;;::::::;*?%%?;;::;;;++;;+++++**??%SSSSSS##
 ```
 
-A closer crop (`docs/images/owl-face.jpg`, width 70) resolves the eyes,
-beak, and feather texture. Dense mode (70 levels) renders it best — try:
+Photo: black puppy via Lorem Picsum (id 237, Unsplash license).
+The dark coat against the light planks is exactly the high-contrast,
+single-subject input ASCII renders best from.
+
+The owl close-up (`docs/images/owl-face.jpg`, width 70) is a second demo
+for detail work. Dense mode (70 levels) renders it best — try:
 
 ```bash
 ashiart docs/images/owl-face.jpg --width 70 --mode dense
@@ -278,7 +282,8 @@ test/
   test_cli.py
 docs/images/
   logo.svg         Project logo and brightness-ramp reference
-  sample.jpg       Sample input used in this README
+  sample.jpg       Sample input used in code snippets
+  puppy.jpg        High-contrast hero sample used in this README
   owl-face.jpg     Tight face crop for high-detail demos
 examples/
   basic_usage.py
