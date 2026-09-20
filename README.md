@@ -1,173 +1,288 @@
-# AshiArt - ASCII Art Generator
+<p align="center">
+  <img src="docs/images/logo.svg" width="640" alt="AshiArt logo: terminal card showing the brightness ramp @ # S % ? * + ; : , . from dark to light" />
+</p>
 
-![Python](https://img.shields.io/badge/python-3.6%2B-blue)
+<h1 align="center">AshiArt</h1>
 
-A Python package for converting images to ASCII art with standard and enhanced features.
+<p align="center">
+  Convert images to ASCII art from the terminal or Python.
+  Plain text, ANSI truecolor, and color-preserving HTML output.
+</p>
+
+<p align="center">
+  <a href="https://pypi.org/project/ashiart/"><img src="https://img.shields.io/pypi/v/ashiart" alt="PyPI version" /></a>
+  <img src="https://img.shields.io/badge/python-3.7%2B-blue" alt="Python 3.7+" />
+  <a href="https://github.com/Faycall1l/Ashiart/actions"><img src="https://github.com/Faycall1l/Ashiart/actions/workflows/python-package.yml/badge.svg" alt="Build status" /></a>
+  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platform support" />
+</p>
+
+## Contents
+
+- [Overview](#overview)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick start](#quick-start)
+- [Command-line reference](#command-line-reference)
+- [Python API](#python-api)
+- [Rendering modes](#rendering-modes)
+- [Character ramp](#character-ramp)
+- [Examples](#examples)
+- [Project structure](#project-structure)
+- [Development](#development)
+- [Contributing](#contributing)
+
+## Overview
+
+AshiArt maps image brightness to characters so pictures remain recognizable
+as text. It is aimed at developers and artists who want fast previews in the
+terminal, stylized text output for documents, and shareable HTML renderings
+that keep the original colors.
+
+Input formats are whatever Pillow supports, including JPEG and PNG.
+
+Sample output (`docs/images/sample.jpg`, width 60):
+
+```text
+#SS#SS%????**?%SSSSSSSSSSS%?**??%?;::::;%S#######SSSSSSS####
+######SSSSS%%SSSSSSSSS%%%%???*????+::::+S######SSS##SSS#####
+#############SSSSS%%S%%????????*?****++*%S##################
+#############SSS%%??**;;;;;;+*??%%?%SSS%%%%%#############SSS
+##############S?%**?%??**+;++;++;;++++*++??%%S##SSSS#####SSS
+##############?**%#@@@##SS%?+;+++++?%??%%?**??SSSS##########
+############@%++?SS#@##@@@@%++++++%@@##@@@#S**?SSSS#########
+#############***+??%S###@@S*+*%*+*S@@@@@#SS%***?############
+#######@#####+*S?+**?**?%%*;;?@?++S###SS%??**??*S###########
+#############?*%#%+;;;;+**+;+??++*???*+***??%???%###########
+###########@@#??%#?;::;+*%?*++**???+;;;;+?%???%%%S##########
+##############%%??SS?+;;+*?%?%?%?*+;;:+%S%???S#SS%@@@#######
+##############%?%?%%SSS?*++*%%**+***?%S%%?%??S#SS%#@@#######
+##############%????%%%%SSS%?%%?%SSSSSS%%%%%%%S##%S##########
+##############S%%%%%%SSSSS#######SSSSSSSSSSSSSSSSSSS########
+SSS###########SSSSSSSS############SS##S##S#S##SSSSSS####SS##
+```
 
 ## Features
 
-### 🎨 Basic Features
-- Convert images to ASCII art with customizable size
-- Support for custom ASCII character sets
-- Command-line interface for quick conversions
-- Python API for integration into your applications
-- Handles various image formats (JPEG, PNG, etc.)
+- Image-to-ASCII conversion with adjustable width and height
+- Four rendering modes: standard, dense, blocks, braille
+- ANSI truecolor terminal output sampled from the source image
+- Color-preserving HTML export with configurable font size
+- Image controls: contrast, brightness, sharpness, edge enhancement,
+  dithering, and inversion
+- Custom character ramps ordered from darkest to lightest
+- Command-line interface and importable Python API
+- Cross-platform: macOS, Linux, and Windows
 
-### ✨ Enhanced Features
-- **Multiple rendering modes**:
-  - Standard ASCII characters
-  - Dense character set (70+ shades)
-  - Unicode block characters
-  - Unicode braille patterns (higher resolution)
-- **Image processing options**:
-  - Contrast, brightness, and sharpness adjustments
-  - Edge enhancement
-  - Dithering
-  - Image inversion
-- **HTML output with original color preservation**
-- Additional convenience functions
+## Requirements
+
+- Python 3.7 or newer
+- Pillow 10 or newer
+- NumPy 1.20 or newer
 
 ## Installation
 
+From PyPI:
+
 ```bash
-# From PyPI
 pip install ashiart
+```
 
-# From GitHub
-pip install git+https://github.com/Faycall1l/Ashiart.git
+From source:
 
-# From source
+```bash
 git clone https://github.com/Faycall1l/Ashiart.git
-cd ashiart
+cd Ashiart
 pip install .
 ```
 
-## Usage
-
-### Command Line Interface
+Development install:
 
 ```bash
-# Basic usage (outputs to console)
-ashiart docs/images/sample.jpg
-
-# Save to file
-ashiart docs/images/sample.jpg -o output.txt
-
-# Change output width to 80 characters
-ashiart docs/images/sample.jpg -w 80
-
-# Specify both width and height
-ashiart docs/images/sample.jpg -w 80 -H 40
-
-# Use custom ASCII characters (from darkest to lightest)
-ashiart docs/images/sample.jpg -c "#@%*+=-:. "
+pip install -e .
+pip install pytest
 ```
 
-### Standard Python API
+## Quick start
+
+Print ASCII art to the terminal:
+
+```bash
+ashiart docs/images/sample.jpg --width 80
+```
+
+Save plain-text output and a color HTML rendering in one run:
+
+```bash
+ashiart docs/images/sample.jpg \
+  --width 80 \
+  --mode dense \
+  --contrast 1.3 \
+  --edge-enhance \
+  --output output.txt \
+  --html output.html
+```
+
+Colorized terminal output with block characters:
+
+```bash
+ashiart docs/images/sample.jpg --mode blocks --color --width 100
+```
+
+Minimal Python usage:
+
+```python
+from ashiart import image_to_ascii
+
+art = image_to_ascii("docs/images/sample.jpg", width=80)
+print(art)
+```
+
+## Command-line reference
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `image_path` | required | Input image path |
+| `-o, --output` | console | Text output file; prints to stdout when omitted |
+| `-w, --width` | `100` | Output width in characters |
+| `-H, --height` | proportional | Output height in characters |
+| `-c, --chars` | built-in ramp | Custom characters, darkest to lightest |
+| `-m, --mode` | `standard` | `standard`, `dense`, `blocks`, or `braille` |
+| `--contrast` | `1.0` | Contrast multiplier |
+| `--brightness` | `1.0` | Brightness multiplier |
+| `--sharpness` | `1.0` | Sharpness multiplier |
+| `--edge-enhance` | off | Enhance edges before mapping |
+| `--dithering` | off | Apply dithering for texture |
+| `--invert` | off | Invert brightness mapping |
+| `--color` | off | Emit ANSI truecolor escape codes |
+| `--html PATH` | none | Write color HTML rendering to `PATH` |
+| `--font-size` | `8` | HTML font size in pixels |
+
+Full help:
+
+```bash
+ashiart --help
+```
+
+## Python API
+
+Basic generator:
 
 ```python
 from ashiart import AsciiArtGenerator, image_to_ascii
 
-# Quick conversion with the convenience function
-ascii_art = image_to_ascii("docs/images/sample.jpg", width=80)
-print(ascii_art)
-
-# Or use the full-featured class
 generator = AsciiArtGenerator(width=80)
-ascii_art = generator.generate_from_image("docs/images/sample.jpg")
-print(ascii_art)
+art = generator.generate_from_image("docs/images/sample.jpg")
+generator.save_to_file(art, "output.txt")
 
-# Save the output to a file
-generator.save_to_file(ascii_art, "output.txt")
-
-# Use custom ASCII characters (from darkest to lightest)
-custom_chars = ["@", "#", "O", "o", ".", " "]
-generator = AsciiArtGenerator(chars=custom_chars, width=80)
+# ANSI truecolor variant
+color_art = generator.generate_from_image("docs/images/sample.jpg", color=True)
 ```
 
-### Enhanced Python API
-
-The enhanced module provides advanced features like image processing options, HTML output with color preservation, and Unicode character modes.
+Enhanced generator:
 
 ```python
-from ashiart import EnhancedAsciiArtGenerator, image_to_enhanced_ascii, image_to_html_ascii
-
-# Basic enhanced usage
-generator = EnhancedAsciiArtGenerator(width=80, mode="standard")
-ascii_art = generator.generate_from_image("docs/images/example.jpg")
-print(ascii_art)
-
-# Apply image enhancements
-generator.set_enhancement(
-    contrast=1.5,       # Increase contrast
-    brightness=1.1,     # Brighten slightly
-    edge_enhance=True,  # Enhance edges
-    dithering=True      # Apply dithering
+from ashiart import (
+    EnhancedAsciiArtGenerator,
+    image_to_enhanced_ascii,
+    image_to_html_ascii,
 )
-ascii_art = generator.generate_from_image("docs/images/example.jpg")
 
-# Use different rendering modes
-# Standard ASCII characters
-generator = EnhancedAsciiArtGenerator(width=80, mode="standard")
-
-# Dense character set (70+ characters for more gradients)
 generator = EnhancedAsciiArtGenerator(width=80, mode="dense")
+generator.set_enhancement(contrast=1.4, brightness=1.05, edge_enhance=True)
+art = generator.generate_from_image("docs/images/sample.jpg")
 
-# Unicode block characters
-generator = EnhancedAsciiArtGenerator(width=80, mode="blocks")
+# ANSI truecolor output
+color_art = generator.generate_from_image("docs/images/sample.jpg", ansi=True)
 
-# Unicode braille patterns (higher resolution)
-generator = EnhancedAsciiArtGenerator(width=40, mode="braille")
-
-# Generate HTML output with preserved colors
+# HTML output with original colors
 html = generator.generate_html(
-    "docs/images/example.jpg",
+    "docs/images/sample.jpg",
     preserve_color=True,
-    font_size=8
+    font_size=8,
 )
 generator.save_html_to_file(html, "output.html")
 
 # Convenience functions
-ascii_art = image_to_enhanced_ascii(
+art = image_to_enhanced_ascii(
     "docs/images/sample.jpg",
     width=80,
     mode="dense",
     contrast=1.3,
-    edge_enhance=True
+    edge_enhance=True,
 )
+html = image_to_html_ascii("docs/images/sample.jpg", width=80)
+```
 
-html = image_to_html_ascii(
-    "docs/images/example.jpg",
-    width=80,
-    preserve_color=True
-)
+## Rendering modes
+
+| Mode | Character set | Best for |
+| --- | --- | --- |
+| `standard` | 11-level ASCII ramp | Clean, readable terminal output |
+| `dense` | 70+ characters | Smoother gradients and detail |
+| `blocks` | Unicode block elements | High-contrast geometric look |
+| `braille` | Unicode braille patterns | Higher effective resolution |
+
+## Character ramp
+
+The default ramp is ordered strictly from darkest to lightest:
+
+```text
+@ # S % ? * + ; : , .
+```
+
+The header logo visualizes this same sequence as a brightness scale.
+Custom ramps must preserve that ordering, for example:
+
+```bash
+ashiart input.jpg --chars "@%*+=-:. "
 ```
 
 ## Examples
 
-Check out the [examples directory](examples/) for more detailed usage examples.
+- `examples/basic_usage.py`: minimal conversion and custom ramps
+- `examples/enhanced_demo.py`: modes, enhancements, and HTML export
+
+Run the basic example:
+
+```bash
+python examples/basic_usage.py docs/images/sample.jpg
+```
+
+## Project structure
+
+```text
+ashiart/
+  __init__.py      Public package exports
+  generator.py     Baseline ASCII generator with ANSI support
+  enhanced.py      Modes, enhancements, HTML, and ANSI support
+  cli.py           Command-line interface
+test/
+  test_generator.py
+  test_enhanced.py
+  test_cli.py
+docs/images/
+  logo.svg         Project logo and brightness-ramp reference
+  sample.jpg       Sample input used in this README
+examples/
+  basic_usage.py
+  enhanced_demo.py
+```
 
 ## Development
 
-### Setup
+Install an editable copy and run the test suite:
 
 ```bash
-# Clone the repository
-git clone https://github.com/Faycall1l/Ashiart.git
-cd ashiart
-
-# Install in development mode
 pip install -e .
-```
-
-### Testing
-
-Run the tests with pytest:
-
-```bash
 pytest
 ```
 
+Continuous integration runs `pytest` on Python 3.7 through 3.11 for pushes
+and pull requests to `main`.
+
 ## Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request. 
+Contributions are welcome. Please open an issue to discuss a change before
+submitting a pull request, keep new behavior covered by tests, and follow
+the existing code style.
