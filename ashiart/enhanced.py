@@ -264,12 +264,14 @@ class EnhancedAsciiArtGenerator:
         else:
             return self._map_pixels_to_ascii_standard(image)
 
-    def generate_from_image(self, image_path):
+    def generate_from_image(self, image_path, ansi=False):
         """
         Generate ASCII art from an image file.
         
         Args:
             image_path (str): Path to the image file.
+            ansi (bool, optional): Wrap characters in ANSI truecolor codes.
+                Defaults to False.
             
         Returns:
             str: ASCII art as a string.
@@ -281,6 +283,9 @@ class EnhancedAsciiArtGenerator:
             image = Image.open(image_path)
         except Exception as e:
             raise ValueError(f"Error opening image: {e}")
+
+        if ansi:
+            return self.generate_ansi_from_pil_image(image)
         
         # Process the image
         image = self._resize_image(image)
@@ -295,16 +300,20 @@ class EnhancedAsciiArtGenerator:
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
-    def generate_from_pil_image(self, image):
+    def generate_from_pil_image(self, image, ansi=False):
         """
         Generate ASCII art from a PIL Image object.
         
         Args:
             image (PIL.Image): PIL Image object.
+            ansi (bool, optional): Wrap characters in ANSI truecolor codes.
+                Defaults to False.
             
         Returns:
             str: ASCII art as a string.
         """
+        if ansi:
+            return self.generate_ansi_from_pil_image(image)
         # Process the image
         image = self._resize_image(image)
         image = self._enhance_image(image)
@@ -317,6 +326,49 @@ class EnhancedAsciiArtGenerator:
         
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
+
+    def generate_ansi_from_pil_image(self, image):
+        """
+        Generate ANSI-colored ASCII art from a PIL Image object.
+
+        Truecolor is sampled from the resized (and enhanced) image.
+        In braille mode the color is the mean of each 2x4 block.
+
+        Args:
+            image (PIL.Image): PIL Image object.
+
+        Returns:
+            str: ANSI-colored ASCII art.
+        """
+        resized = self._resize_image(image.convert("RGB"))
+        enhanced = self._enhance_image(resized)
+        grayscale = self._convert_to_grayscale(enhanced)
+        if self.dithering:
+            grayscale = self._apply_dithering(grayscale)
+
+        ascii_image = self._map_pixels_to_ascii(grayscale)
+        color_arr = np.array(enhanced)
+
+        lines = []
+        if self.mode == "braille":
+            h, w, _ = color_arr.shape
+            for y, row in enumerate(ascii_image):
+                parts = []
+                for x, char in enumerate(row):
+                    block = color_arr[y * 4:y * 4 + 4, x * 2:x * 2 + 2]
+                    r, g, b = block.reshape(-1, 3).mean(axis=0).astype(int)
+                    parts.append(f"\x1b[38;2;{r};{g};{b}m{char}\x1b[0m")
+                lines.append("".join(parts))
+        else:
+            flat = color_arr.reshape(-1, 3)
+            width = color_arr.shape[1]
+            for y, row in enumerate(ascii_image):
+                parts = []
+                for x, char in enumerate(row):
+                    r, g, b = flat[y * width + x]
+                    parts.append(f"\x1b[38;2;{r};{g};{b}m{char}\x1b[0m")
+                lines.append("".join(parts))
+        return "\n".join(lines)
 
     def generate_html(self, image_path, font_size=10, font_family="monospace", 
                      preserve_color=False):
@@ -434,7 +486,8 @@ class EnhancedAsciiArtGenerator:
 # Convenience functions
 def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard", 
                           contrast=1.0, brightness=1.0, sharpness=1.0, 
-                          dithering=False, edge_enhance=False, invert=False):
+                          dithering=False, edge_enhance=False, invert=False,
+                          ansi=False):
     """
     Convenience function to convert an image to enhanced ASCII art.
     
@@ -450,6 +503,7 @@ def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard",
         dithering (bool, optional): Whether to apply dithering.
         edge_enhance (bool, optional): Whether to enhance edges.
         invert (bool, optional): Whether to invert the image.
+        ansi (bool, optional): Wrap output in ANSI truecolor codes.
         
     Returns:
         str: ASCII art as a string.
@@ -458,7 +512,7 @@ def image_to_enhanced_ascii(image_path, width=100, height=None, mode="standard",
     generator.set_enhancement(contrast=contrast, brightness=brightness, 
                             sharpness=sharpness, dithering=dithering, 
                             edge_enhance=edge_enhance, invert=invert)
-    return generator.generate_from_image(image_path)
+    return generator.generate_from_image(image_path, ansi=ansi)
 
 
 def image_to_html_ascii(image_path, width=100, height=None, mode="dense", 
