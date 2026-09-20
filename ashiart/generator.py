@@ -78,12 +78,14 @@ class AsciiArtGenerator:
         
         return ascii_image
 
-    def generate_from_image(self, image_path):
+    def generate_from_image(self, image_path, color=False):
         """
         Generate ASCII art from an image file.
         
         Args:
             image_path (str): Path to the image file.
+            color (bool, optional): Wrap characters in ANSI truecolor codes
+                sampled from the original image. Defaults to False.
             
         Returns:
             str: ASCII art as a string.
@@ -96,6 +98,9 @@ class AsciiArtGenerator:
         except Exception as e:
             raise ValueError(f"Error opening image: {e}")
         
+        if color:
+            return self.generate_ansi_from_pil_image(image)
+
         # Process the image
         image = self._resize_image(image)
         grayscale_image = self._convert_to_grayscale(image)
@@ -104,16 +109,20 @@ class AsciiArtGenerator:
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
-    def generate_from_pil_image(self, image):
+    def generate_from_pil_image(self, image, color=False):
         """
         Generate ASCII art from a PIL Image object.
         
         Args:
             image (PIL.Image): PIL Image object.
+            color (bool, optional): Wrap characters in ANSI truecolor codes.
+                Defaults to False.
             
         Returns:
             str: ASCII art as a string.
         """
+        if color:
+            return self.generate_ansi_from_pil_image(image)
         # Process the image
         image = self._resize_image(image)
         grayscale_image = self._convert_to_grayscale(image)
@@ -121,6 +130,35 @@ class AsciiArtGenerator:
         
         # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
+
+    def generate_ansi_from_pil_image(self, image):
+        """
+        Generate ANSI-colored ASCII art from a PIL Image object.
+
+        Each character is wrapped in a truecolor foreground escape
+        (``\\x1b[38;2;R;G;Bm``) sampled from the resized original image,
+        reset with ``\\x1b[0m`` after every character.
+
+        Args:
+            image (PIL.Image): PIL Image object.
+
+        Returns:
+            str: ANSI-colored ASCII art.
+        """
+        color_image = self._resize_image(image.convert("RGB"))
+        grayscale_image = self._convert_to_grayscale(color_image)
+        ascii_image = self._map_pixels_to_ascii(grayscale_image)
+        color_pixels = list(color_image.getdata())
+        width = color_image.width
+
+        lines = []
+        for y, row in enumerate(ascii_image):
+            parts = []
+            for x, char in enumerate(row):
+                r, g, b = color_pixels[y * width + x][:3]
+                parts.append(f"\x1b[38;2;{r};{g};{b}m{char}\x1b[0m")
+            lines.append("".join(parts))
+        return "\n".join(lines)
 
     def save_to_file(self, ascii_art, output_path):
         """
