@@ -16,6 +16,7 @@ setup(
     author="Faycal Amrouche",
     author_email="fayam69420@gmail.com",
     description="A package for generating ASCII art from images",
+    url="https://github.com/Faycall1l/Ashiart",
     keywords="ascii, art, image, converter",
     python_requires=">=3.8",
 ) 

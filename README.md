@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/logo.svg" width="640" alt="AshiArt logo: terminal card showing the brightness ramp @ # S % ? * + ; : , . from dark to light" />
+  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/logo.svg" width="640" alt="AshiArt logo: terminal card showing the brightness ramp @ # S % ? * + ; : , . from dark to light" />
 </p>
 
 <h1 align="center">AshiArt</h1>
