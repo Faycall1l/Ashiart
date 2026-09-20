@@ -14,7 +14,7 @@ setup(
         ],
     },
     author="Faycal Amrouche",
-    author_email="example@example.com",
+    author_email="fayam69420@gmail.com",
     description="A package for generating ASCII art from images",
     keywords="ascii, art, image, converter",
     python_requires=">=3.6",
