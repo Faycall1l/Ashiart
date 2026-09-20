@@ -13,6 +13,7 @@
   <a href="https://pypi.org/project/ashiart/"><img src="https://img.shields.io/pypi/v/ashiart" alt="PyPI version" /></a>
   <img src="https://img.shields.io/badge/python-3.7%2B-blue" alt="Python 3.7+" />
   <a href="https://github.com/Faycall1l/Ashiart/actions"><img src="https://github.com/Faycall1l/Ashiart/actions/workflows/python-package.yml/badge.svg" alt="Build status" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
   <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platform support" />
 </p>
 
@@ -31,6 +32,7 @@
 - [Project structure](#project-structure)
 - [Development](#development)
 - [Contributing](#contributing)
+- [License](#license)
 
 ## Overview
 
@@ -286,3 +288,8 @@ and pull requests to `main`.
 Contributions are welcome. Please open an issue to discuss a change before
 submitting a pull request, keep new behavior covered by tests, and follow
 the existing code style.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE)
+file for details.
