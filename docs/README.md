@@ -4,8 +4,8 @@ This directory holds the image assets referenced by the main README.
 
 ## Images
 
-- `images/logo.svg` — project logo; the terminal card shows the
-  brightness ramp darkest to lightest
+- `images/logo.svg` — project logo; a flat 4×4 density grid fading
+  solid to empty, the product (brightness to ink) as geometry
 - `images/sample.jpg` / `images/example.jpg` — owl photo used across
   code snippets and API examples
 - `images/puppy.jpg` — high-contrast hero sample in the main README

@@ -1,33 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="640" height="180" viewBox="0 0 640 180" role="img" aria-label="AshiArt logo">
-  <defs>
-    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#5EEAD4"/>
-      <stop offset="1" stop-color="#60A5FA"/>
-    </linearGradient>
-    <linearGradient id="panel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#161B22"/>
-      <stop offset="1" stop-color="#0D1117"/>
-    </linearGradient>
-  </defs>
-  <rect x="0" y="0" width="640" height="180" rx="16" fill="url(#panel)"/>
+  <title>Density grid: sixteen cells fading from solid to empty, left to right, top to bottom</title>
+  <rect x="0" y="0" width="640" height="180" rx="16" fill="#0D1117"/>
   <rect x="0.75" y="0.75" width="638.5" height="178.5" rx="15.25" fill="none" stroke="#30363D" stroke-width="1.5"/>
-  <!-- Terminal glyph card: shows the real brightness ramp, darkest to lightest -->
-  <g>
-    <rect x="28" y="28" width="124" height="124" rx="12" fill="#010409" stroke="#30363D" stroke-width="1.5"/>
-    <circle cx="46" cy="46" r="4" fill="#FF5F56"/>
-    <circle cx="60" cy="46" r="4" fill="#FEBC2E"/>
-    <circle cx="74" cy="46" r="4" fill="#28C840"/>
-    <title>Brightness ramp: @ # S % ? * + ; : , . + space (darkest to lightest)</title>
-    <!-- Hero glyph: "@" is index 0, the darkest character of the ramp -->
-    <text x="44" y="88" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="38" font-weight="700" fill="url(#accent)">@</text>
-    <!-- Full project ramp in exact code order, opacity fading dark to light -->
-    <text x="42" y="110" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="12" letter-spacing="1"><tspan fill="#F0F6FC" opacity="1.0">@</tspan><tspan fill="#E6EDF3" opacity="0.94">#</tspan><tspan fill="#D8E0E8" opacity="0.88">S</tspan><tspan fill="#C9D4DE" opacity="0.82">%</tspan><tspan fill="#B7C3CF" opacity="0.76">?</tspan><tspan fill="#A5B2BF" opacity="0.70">*</tspan><tspan fill="#93A1B0" opacity="0.64">+</tspan><tspan fill="#848F9E" opacity="0.58">;</tspan><tspan fill="#767F8D" opacity="0.52">:</tspan><tspan fill="#6E7681" opacity="0.46">,</tspan><tspan fill="#656D76" opacity="0.40">.</tspan></text>
-    <text x="42" y="128" font-family="SFMono-Regular, Menlo, Consolas, 'Liberation Mono', monospace" font-size="9" fill="#6E7681">dark &#8594; light</text>
+  <g fill="#E8A33D">
+    <rect x="28" y="29" width="26" height="26" fill-opacity="1.00"/>
+    <rect x="60" y="29" width="26" height="26" fill-opacity="0.94"/>
+    <rect x="92" y="29" width="26" height="26" fill-opacity="0.87"/>
+    <rect x="124" y="29" width="26" height="26" fill-opacity="0.81"/>
+    <rect x="28" y="61" width="26" height="26" fill-opacity="0.75"/>
+    <rect x="60" y="61" width="26" height="26" fill-opacity="0.69"/>
+    <rect x="92" y="61" width="26" height="26" fill-opacity="0.62"/>
+    <rect x="124" y="61" width="26" height="26" fill-opacity="0.56"/>
+    <rect x="28" y="93" width="26" height="26" fill-opacity="0.50"/>
+    <rect x="60" y="93" width="26" height="26" fill-opacity="0.44"/>
+    <rect x="92" y="93" width="26" height="26" fill-opacity="0.37"/>
+    <rect x="124" y="93" width="26" height="26" fill-opacity="0.31"/>
+    <rect x="28" y="125" width="26" height="26" fill-opacity="0.25"/>
+    <rect x="60" y="125" width="26" height="26" fill-opacity="0.19"/>
+    <rect x="92" y="125" width="26" height="26" fill-opacity="0.12"/>
+    <rect x="124" y="125" width="26" height="26" fill-opacity="0.06"/>
   </g>
-  <!-- Wordmark -->
   <g>
     <text x="176" y="86" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="-0.5" fill="#F0F6FC">AshiArt</text>
-    <text x="178" y="114" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#8B949E">ASCII art generator for images</text>
-    <rect x="178" y="128" width="72" height="4" rx="2" fill="url(#accent)"/>
+    <text x="178" y="114" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="15" fill="#8B949E">Image-to-ASCII converter</text>
+    <rect x="178" y="128" width="72" height="4" fill="#E8A33D"/>
   </g>
 </svg>

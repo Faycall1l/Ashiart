@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/logo.svg" width="640" alt="AshiArt logo: terminal card showing the brightness ramp @ # S % ? * + ; : , . from dark to light" />
+  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/logo.svg" width="640" alt="AshiArt logo: sixteen amber cells fading from solid to empty on near-black" />
 </p>
 
 <h1 align="center">AshiArt</h1>
@@ -14,7 +14,6 @@
   <img src="https://img.shields.io/badge/python-3.8%2B-blue" alt="Python 3.8+" />
   <a href="https://github.com/Faycall1l/Ashiart/actions"><img src="https://github.com/Faycall1l/Ashiart/actions/workflows/python-package.yml/badge.svg" alt="Build status" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
-  <img src="https://img.shields.io/badge/platform-macOS%20%7C%20Linux%20%7C%20Windows-lightgrey" alt="Platform support" />
 </p>
 
 ## Contents
@@ -33,6 +32,7 @@
 - [Project structure](#project-structure)
 - [Development](#development)
 - [Contributing](#contributing)
+- [Acknowledgements](#acknowledgements)
 - [License](#license)
 
 ## Overview
@@ -270,8 +270,9 @@ with a space, so pure white renders as blank paper instead of a dot:
 @ # S % ? * + ; : , . (space)
 ```
 
-The header logo visualizes this same sequence as a brightness scale.
-Custom ramps must preserve that ordering, for example:
+The header logo states the same idea geometrically: a grid of cells
+fading from solid to empty, i.e. brightness mapped to ink.
+Custom ramps must preserve darkest-to-lightest ordering, for example:
 
 ```bash
 ashiart input.jpg --chars "@%*+=-:. "
@@ -362,6 +363,16 @@ and pull requests to `main`.
 Contributions are welcome. Please open an issue to discuss a change before
 submitting a pull request, keep new behavior covered by tests, and follow
 the existing code style.
+
+## Acknowledgements
+
+- [BEPb/image_to_ascii](https://github.com/BEPb/image_to_ascii) for the
+  URL-input, video-conversion, and gallery ideas this project adopts
+- Paul Bourke for the canonical density ramps
+  ([Character representation of grey scale images](http://www.paulbourke.net/dataformats/asciiart/))
+- Alex Harri Jónsson and the pixquill benchmark for the shape-aware
+  rendering literature behind the edge overlay and measured ramp
+- Lorem Picsum for the puppy demo photo (id 237, Unsplash license)
 
 ## License
 
