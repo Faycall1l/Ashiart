@@ -183,6 +183,15 @@ class TestAsciiArtGenerator(unittest.TestCase):
         rgb = Image.new("RGB", (4, 4), color="red")
         self.assertIs(flatten_alpha(rgb), rgb)
 
+    def test_open_image_accepts_raw_bytes(self):
+        """Piped stdin bytes must decode like files."""
+        import io as stdlib_io
+        from ashiart.io import open_image
+        buffer = stdlib_io.BytesIO()
+        self.test_image.save(buffer, format="PNG")
+        image = open_image(buffer.getvalue())
+        self.assertEqual(image.size, (100, 50))
+
     def test_exif_orientation_applied(self):
         """EXIF orientation 6 must transpose stored landscape to portrait."""
         img = Image.new("RGB", (8, 4), color="white")

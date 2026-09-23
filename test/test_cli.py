@@ -28,6 +28,45 @@ class TestCLI(unittest.TestCase):
         """Clean up test fixtures."""
         self.temp_dir.cleanup()
 
+    def test_stdin_dash_reads_piped_bytes(self):
+        """image_path '-' must consume piped stdin bytes."""
+        import io as stdlib_io
+        import types
+
+        with open(self.test_image_path, "rb") as file:
+            payload = file.read()
+        fake_stdin = types.SimpleNamespace(buffer=stdlib_io.BytesIO(payload))
+        with patch.object(sys, "stdin", fake_stdin):
+            with patch("builtins.print") as mock_print:
+                result = main(["-", "-w", "5", "-H", "3"])
+        self.assertEqual(result, 0)
+        mock_print.assert_called_once()
+        self.assertEqual(len(mock_print.call_args[0][0].split("\n")), 3)
+
+    def test_no_color_strips_ansi(self):
+        """NO_COLOR must disable --color even when requested."""
+        import contextlib
+        import io as stdlib_io
+
+        buffer = stdlib_io.StringIO()
+        with patch.dict(os.environ, {"NO_COLOR": "1"}):
+            with contextlib.redirect_stdout(buffer):
+                result = main([self.test_image_path, "--color", "-w", "5", "-H", "3"])
+        self.assertEqual(result, 0)
+        self.assertNotIn("\x1b[", buffer.getvalue())
+
+    def test_module_entry_point(self):
+        """python -m ashiart must expose the CLI."""
+        import subprocess
+
+        completed = subprocess.run(
+            [sys.executable, "-m", "ashiart", "--help"],
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(completed.returncode, 0)
+        self.assertIn("usage: ashiart", completed.stdout)
+
     @patch('sys.argv')
     @patch('builtins.print')
     def test_main_with_output_file(self, mock_print, mock_argv):

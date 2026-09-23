@@ -61,10 +61,11 @@ def prepare_image(image):
 
 
 def open_image(source, timeout=15):
-    """Open a PIL image from a local path or an http(s) URL.
+    """Open a PIL image from a local path, bytes, or an http(s) URL.
 
     Args:
-        source (str): Filesystem path or http(s) URL.
+        source (str or bytes): Filesystem path, raw image bytes
+            (e.g. piped stdin), or http(s) URL.
         timeout (float): Download timeout in seconds; URLs only.
 
     Raises:
@@ -74,6 +75,13 @@ def open_image(source, timeout=15):
     Returns:
         PIL.Image: The decoded image.
     """
+    if isinstance(source, (bytes, bytearray)):
+        try:
+            image = Image.open(io.BytesIO(source))
+            image.load()
+        except Exception as error:
+            raise ValueError(f"Bytes are not an image: {error}")
+        return prepare_image(image)
     if isinstance(source, str) and source.startswith(("http://", "https://")):
         request = urllib.request.Request(source, headers={"User-Agent": _USER_AGENT})
         try:

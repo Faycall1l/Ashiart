@@ -1,6 +1,7 @@
 """Command-line interface for ASCII art generator."""
 
 import argparse
+import os
 import sys
 
 from .enhanced import EnhancedAsciiArtGenerator
@@ -12,7 +13,7 @@ def build_parser():
         prog="ashiart",
         description="Convert images to ASCII art (terminal, text or HTML)",
     )
-    parser.add_argument("image_path", help="Local image path or http(s) URL")
+    parser.add_argument("image_path", help="Local image path, http(s) URL, or - for stdin")
     parser.add_argument(
         "-o", "--output",
         help="Path to save the ASCII art output (if not provided, prints to console)"
@@ -71,6 +72,10 @@ def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
 
+    if os.environ.get("NO_COLOR") or os.environ.get("TERM") == "dumb":
+        args.color = False
+
+    source = sys.stdin.buffer.read() if args.image_path == "-" else args.image_path
     chars = list(args.chars) if args.chars else None
     generator = EnhancedAsciiArtGenerator(
         chars=chars,
@@ -91,11 +96,11 @@ def main(argv=None):
     )
 
     try:
-        ascii_art = generator.generate_from_image(args.image_path, ansi=args.color)
+        ascii_art = generator.generate_from_image(source, ansi=args.color)
 
         if args.html:
             html = generator.generate_html(
-                args.image_path,
+                source,
                 preserve_color=True,
                 font_size=args.font_size,
             )
