@@ -67,6 +67,52 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(completed.returncode, 0)
         self.assertIn("usage: ashiart", completed.stdout)
 
+    def test_demo_needs_no_input(self):
+        """--demo must render without any image argument."""
+        with patch("builtins.print") as mock_print:
+            result = main(["--demo", "-w", "20"])
+        self.assertEqual(result, 0)
+        mock_print.assert_called_once()
+
+    def test_missing_input_is_usage_error(self):
+        """No image and no --demo must exit with code 2."""
+        with self.assertRaises(SystemExit) as context:
+            with patch("sys.stderr"):
+                main([])
+        self.assertEqual(context.exception.code, 2)
+
+    def test_open_requires_html(self):
+        """--open without --html must exit with code 2."""
+        with self.assertRaises(SystemExit) as context:
+            with patch("sys.stderr"):
+                main([self.test_image_path, "--open"])
+        self.assertEqual(context.exception.code, 2)
+
+    def test_open_launches_browser(self):
+        """--open must open the written HTML file URL."""
+        with patch("webbrowser.open") as mock_open:
+            with patch("builtins.print"):
+                result = main([self.test_image_path, "--html", self.output_path + ".html",
+                               "--open", "-w", "5", "-H", "3"])
+        self.assertEqual(result, 0)
+        mock_open.assert_called_once()
+        self.assertTrue(mock_open.call_args[0][0].startswith("file://"))
+
+    def test_width_defaults_to_terminal_size(self):
+        """No -w on a tty must use the terminal width."""
+        import contextlib
+        import io as stdlib_io
+        import shutil as shutil_module
+
+        buffer = stdlib_io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            with patch.object(buffer, "isatty", return_value=True):
+                with patch.object(shutil_module, "get_terminal_size",
+                                  return_value=os.terminal_size((40, 24))):
+                    result = main([self.test_image_path])
+        self.assertEqual(result, 0)
+        self.assertTrue(all(len(line) == 40 for line in buffer.getvalue().split("\n") if line))
+
     @patch('sys.argv')
     @patch('builtins.print')
     def test_main_with_output_file(self, mock_print, mock_argv):

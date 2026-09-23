@@ -2,9 +2,21 @@
 
 import argparse
 import os
+import shutil
 import sys
+import tempfile
+import webbrowser
 
 from .enhanced import EnhancedAsciiArtGenerator
+from .io import demo_image
+
+
+def _demo_path():
+    """Procedural demo image, written once to the system temp directory."""
+    path = os.path.join(tempfile.gettempdir(), "ashiart-demo.png")
+    if not os.path.exists(path):
+        demo_image().save(path)
+    return path
 
 
 def build_parser():
@@ -13,7 +25,10 @@ def build_parser():
         prog="ashiart",
         description="Convert images to ASCII art (terminal, text or HTML)",
     )
-    parser.add_argument("image_path", help="Local image path, http(s) URL, or - for stdin")
+    parser.add_argument("image_path", nargs="?",
+                        help="Local image path, http(s) URL, or - for stdin")
+    parser.add_argument("--demo", action="store_true",
+                        help="Render a built-in calibration image (no input needed)")
     parser.add_argument(
         "-o", "--output",
         help="Path to save the ASCII art output (if not provided, prints to console)"
@@ -21,8 +36,8 @@ def build_parser():
     parser.add_argument(
         "-w", "--width",
         type=int,
-        default=100,
-        help="Width of the ASCII art in characters (default: 100)"
+        default=None,
+        help="Width of the ASCII art in characters (default: terminal width, else 100)"
     )
     parser.add_argument(
         "-H", "--height",
@@ -62,6 +77,8 @@ def build_parser():
     parser.add_argument("--html",
                         metavar="PATH",
                         help="Also write color HTML output to PATH")
+    parser.add_argument("--open", action="store_true",
+                        help="Open the --html output in a browser (requires --html)")
     parser.add_argument("--font-size", type=int, default=8,
                         help="Font size for HTML output (default: 8)")
     return parser
@@ -75,11 +92,28 @@ def main(argv=None):
     if os.environ.get("NO_COLOR") or os.environ.get("TERM") == "dumb":
         args.color = False
 
-    source = sys.stdin.buffer.read() if args.image_path == "-" else args.image_path
+    if args.open and not args.html:
+        parser.error("--open requires --html PATH")
+
+    if args.demo:
+        source = _demo_path()
+    elif not args.image_path:
+        parser.error("an image path, URL, - for stdin, or --demo is required")
+    elif args.image_path == "-":
+        source = sys.stdin.buffer.read()
+    else:
+        source = args.image_path
+
+    width = args.width
+    if width is None:
+        try:
+            width = shutil.get_terminal_size().columns if sys.stdout.isatty() else 100
+        except OSError:
+            width = 100
     chars = list(args.chars) if args.chars else None
     generator = EnhancedAsciiArtGenerator(
         chars=chars,
-        width=args.width,
+        width=width,
         height=args.height,
         mode=args.mode,
     )
@@ -106,6 +140,8 @@ def main(argv=None):
             )
             generator.save_html_to_file(html, args.html)
             print(f"HTML output saved to {args.html}")
+            if args.open:
+                webbrowser.open("file://" + os.path.abspath(args.html))
 
         if args.output:
             generator.save_to_file(ascii_art, args.output)

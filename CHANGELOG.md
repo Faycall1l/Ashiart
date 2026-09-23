@@ -14,6 +14,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   flatten onto white instead of decoding transparent pixels as black
 - EXIF orientation: phone photos render upright via `exif_transpose`;
   load prep centralized in `prepare_image` (orient, then flatten)
+- Input flexibility: `-` reads piped stdin bytes, `python -m ashiart`
+  works, `NO_COLOR`/`TERM=dumb` disables ANSI color
+- `--demo` renders a procedural calibration image with zero setup;
+  `--open` opens `--html` output in a browser
+- Default width follows the terminal size on ttys (100 elsewhere)
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);

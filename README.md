@@ -152,6 +152,12 @@ No local file needed — URLs download on the fly:
 ashiart https://picsum.photos/id/237/1200/800 --width 80
 ```
 
+Nothing at hand at all — render the built-in calibration image:
+
+```bash
+ashiart --demo --width 80
+```
+
 Save plain-text output and a color HTML rendering in one run:
 
 ```bash
@@ -183,9 +189,10 @@ print(art)
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `image_path` | required | Local path or http(s) URL |
+| `image_path` | required | Local path, http(s) URL, `-` for stdin; omit with `--demo` |
+| `--demo` | off | Render the built-in calibration image |
 | `-o, --output` | console | Text output file; prints to stdout when omitted |
-| `-w, --width` | `100` | Output width in characters |
+| `-w, --width` | tty width, else `100` | Output width in characters |
 | `-H, --height` | proportional | Output height in characters |
 | `-c, --chars` | built-in ramp | Custom characters, darkest to lightest |
 | `-m, --mode` | `standard` | `standard`, `dense`, `blocks`, or `braille` |
@@ -200,6 +207,7 @@ print(art)
 | `--invert` | off | Invert brightness mapping |
 | `--color` | off | Emit ANSI truecolor escape codes |
 | `--html PATH` | none | Write color HTML rendering to `PATH` |
+| `--open` | off | Open the `--html` output in a browser (requires `--html`) |
 | `--font-size` | `8` | HTML font size in pixels |
 
 Full help:

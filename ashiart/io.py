@@ -4,7 +4,7 @@ import io
 import os
 import urllib.request
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageDraw, ImageOps
 
 _USER_AGENT = "ashiart"
 _FLAT_BACKGROUND = (255, 255, 255)
@@ -58,6 +58,39 @@ def prepare_image(image):
         PIL.Image: Oriented, opaque RGB-ready image.
     """
     return flatten_alpha(apply_exif_orientation(image))
+
+
+def demo_image(size=(240, 120)):
+    """Procedural calibration image: luma gradient, disc, bars, diagonal.
+
+    Exercises the full ramp plus straight and curved contours with no
+    input files involved.
+
+    Args:
+        size (tuple): Pixel dimensions.
+
+    Returns:
+        PIL.Image: RGB test image.
+    """
+    width, height = size
+    gradient = Image.new("L", size)
+    pixels = gradient.load()
+    for x in range(width):
+        level = int(255 * x / (width - 1))
+        for y in range(height):
+            pixels[x, y] = level
+    image = gradient.convert("RGB")
+    draw = ImageDraw.Draw(image)
+    draw.ellipse(
+        [(width // 4, height // 6), (width // 2, height - height // 6)],
+        fill=(0, 0, 0),
+    )
+    draw.rectangle(
+        [(width // 2 + 10, height // 3), (width - 10, 2 * height // 3)],
+        fill=(255, 255, 255),
+    )
+    draw.line([(0, height - 1), (width - 1, 0)], fill=(128, 128, 128), width=3)
+    return image
 
 
 def open_image(source, timeout=15):
