@@ -1,10 +1,10 @@
-"""Image loading from local paths and URLs."""
+"""Image loading, orientation, and alpha flattening."""
 
 import io
 import os
 import urllib.request
 
-from PIL import Image
+from PIL import Image, ImageOps
 
 _USER_AGENT = "ashiart"
 _FLAT_BACKGROUND = (255, 255, 255)
@@ -33,6 +33,33 @@ def flatten_alpha(image, background=_FLAT_BACKGROUND):
     return image
 
 
+def apply_exif_orientation(image):
+    """Rotate the image per its EXIF orientation tag, if present.
+
+    Phone photos are stored unrotated with an orientation flag; without
+    this they convert sideways. Images without the tag pass through.
+
+    Args:
+        image (PIL.Image): The decoded image.
+
+    Returns:
+        PIL.Image: Correctly oriented image.
+    """
+    return ImageOps.exif_transpose(image)
+
+
+def prepare_image(image):
+    """Orient then flatten: the common entry for all decode paths.
+
+    Args:
+        image (PIL.Image): The decoded image.
+
+    Returns:
+        PIL.Image: Oriented, opaque RGB-ready image.
+    """
+    return flatten_alpha(apply_exif_orientation(image))
+
+
 def open_image(source, timeout=15):
     """Open a PIL image from a local path or an http(s) URL.
 
@@ -59,10 +86,10 @@ def open_image(source, timeout=15):
             image.load()
         except Exception as error:
             raise ValueError(f"Downloaded bytes are not an image: {error}")
-        return flatten_alpha(image)
+        return prepare_image(image)
     if not os.path.exists(source):
         raise FileNotFoundError(f"Image file not found: {source}")
     try:
-        return flatten_alpha(Image.open(source))
+        return prepare_image(Image.open(source))
     except Exception as error:
         raise ValueError(f"Error opening image: {error}")

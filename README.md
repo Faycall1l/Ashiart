@@ -289,13 +289,15 @@ ashiart input.jpg --chars "@%*+=-:. "
 Each output cell corresponds to exactly one resized pixel (braille packs
 a 2×4 block per cell). The pipeline, in order:
 
+0. **Load.** Decode from a local path or http(s) URL, apply EXIF
+   orientation so phone photos render upright, and composite
+   transparency onto white.
 1. **Resample.** LANCZOS downscale to `width` columns. Rows default to
    `height × width / image_width × 0.5`, compensating the ~2:1
    height-to-width ratio of monospace glyphs; `--height` overrides it.
 2. **Enhance.** Contrast, brightness, and sharpness multipliers, then an
    edge-enhancement filter and optional inversion. All default to neutral.
-3. **Grayscale.** Transparent pixels composite onto white first.
-   PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
+3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
    default, stretches the used range to 0–255 with a 1% cutoff so the
    full ramp is exercised.
 4. **Edge field (optional, `--edges`).** 3×3 Sobel gradients per cell,

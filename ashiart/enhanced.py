@@ -7,7 +7,7 @@ and the image_to_html_ascii HTML helper.
 import numpy as np
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 
-from .io import flatten_alpha, open_image
+from .io import open_image, prepare_image
 
 
 class EnhancedAsciiArtGenerator:
@@ -387,7 +387,7 @@ class EnhancedAsciiArtGenerator:
         """
         if ansi:
             return self.generate_ansi_from_pil_image(image)
-        image = self._resize_image(flatten_alpha(image))
+        image = self._resize_image(prepare_image(image))
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
         edge_grid = self._compute_edge_grid(grayscale_image)
@@ -413,7 +413,7 @@ class EnhancedAsciiArtGenerator:
         Returns:
             str: ANSI-colored ASCII art.
         """
-        resized = self._resize_image(flatten_alpha(image).convert("RGB"))
+        resized = self._resize_image(prepare_image(image).convert("RGB"))
         enhanced = self._enhance_image(resized)
         grayscale = self._convert_to_grayscale(enhanced)
         edge_grid = self._compute_edge_grid(grayscale)

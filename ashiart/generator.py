@@ -6,7 +6,7 @@ as the fallback when enhanced dependencies are unavailable.
 
 from PIL import Image, ImageOps
 
-from .io import flatten_alpha, open_image
+from .io import open_image, prepare_image
 
 
 class AsciiArtGenerator:
@@ -132,7 +132,7 @@ class AsciiArtGenerator:
         """
         if color:
             return self.generate_ansi_from_pil_image(image)
-        image = self._resize_image(flatten_alpha(image))
+        image = self._resize_image(prepare_image(image))
         grayscale_image = self._convert_to_grayscale(image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         
@@ -152,7 +152,7 @@ class AsciiArtGenerator:
         Returns:
             str: ANSI-colored ASCII art.
         """
-        color_image = self._resize_image(flatten_alpha(image).convert("RGB"))
+        color_image = self._resize_image(prepare_image(image).convert("RGB"))
         grayscale_image = self._convert_to_grayscale(color_image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         color_pixels = list(color_image.getdata())

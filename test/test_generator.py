@@ -183,6 +183,25 @@ class TestAsciiArtGenerator(unittest.TestCase):
         rgb = Image.new("RGB", (4, 4), color="red")
         self.assertIs(flatten_alpha(rgb), rgb)
 
+    def test_exif_orientation_applied(self):
+        """EXIF orientation 6 must transpose stored landscape to portrait."""
+        img = Image.new("RGB", (8, 4), color="white")
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([(0, 0), (3, 3)], fill="black")
+        exif = img.getexif()
+        exif[0x0112] = 6
+        path = os.path.join(self.temp_dir.name, "oriented.jpg")
+        img.save(path, exif=exif, quality=95)
+
+        from ashiart.io import open_image
+        self.assertEqual(open_image(path).size, (4, 8))
+
+        gen = AsciiArtGenerator(width=4, autocontrast=False)
+        lines = gen.generate_from_image(path).split("\n")
+        self.assertEqual(len(lines), 4)
+        self.assertEqual(lines[0][0], "@")
+        self.assertEqual(lines[-1][0], " ")
+
     def test_image_to_ascii_function(self):
         """Test the convenience function."""
         ascii_art = image_to_ascii(self.test_image_path, width=10, height=5)

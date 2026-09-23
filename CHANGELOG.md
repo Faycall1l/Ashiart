@@ -12,6 +12,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   no new dependency)
 - Transparency compositing: RGBA, LA, and paletted images with alpha
   flatten onto white instead of decoding transparent pixels as black
+- EXIF orientation: phone photos render upright via `exif_transpose`;
+  load prep centralized in `prepare_image` (orient, then flatten)
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);
