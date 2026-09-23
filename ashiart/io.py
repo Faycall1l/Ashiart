@@ -93,12 +93,14 @@ def demo_image(size=(240, 120)):
     return image
 
 
-def open_image(source, timeout=15):
-    """Open a PIL image from a local path, bytes, or an http(s) URL.
+def open_raw(source, timeout=15):
+    """Decode an image without orientation or flattening.
+
+    Unlike open_image, the result stays seekable, so GIF frames can be
+    iterated. Callers own orientation handling for multi-frame sources.
 
     Args:
-        source (str or bytes): Filesystem path, raw image bytes
-            (e.g. piped stdin), or http(s) URL.
+        source (str or bytes): Filesystem path, raw image bytes, or URL.
         timeout (float): Download timeout in seconds; URLs only.
 
     Raises:
@@ -114,7 +116,7 @@ def open_image(source, timeout=15):
             image.load()
         except Exception as error:
             raise ValueError(f"Bytes are not an image: {error}")
-        return prepare_image(image)
+        return image
     if isinstance(source, str) and source.startswith(("http://", "https://")):
         request = urllib.request.Request(source, headers={"User-Agent": _USER_AGENT})
         try:
@@ -123,14 +125,35 @@ def open_image(source, timeout=15):
         except Exception as error:
             raise ValueError(f"Could not download image: {error}")
         try:
-            image = Image.open(io.BytesIO(data))
-            image.load()
+            return Image.open(io.BytesIO(data))
         except Exception as error:
             raise ValueError(f"Downloaded bytes are not an image: {error}")
-        return prepare_image(image)
     if not os.path.exists(source):
         raise FileNotFoundError(f"Image file not found: {source}")
     try:
-        return prepare_image(Image.open(source))
+        return Image.open(source)
+    except Exception as error:
+        raise ValueError(f"Error opening image: {error}")
+
+
+def open_image(source, timeout=15):
+    """Open a PIL image from a local path, bytes, or an http(s) URL.
+
+    Args:
+        source (str or bytes): Filesystem path, raw image bytes
+            (e.g. piped stdin), or http(s) URL.
+        timeout (float): Download timeout in seconds; URLs only.
+
+    Raises:
+        FileNotFoundError: Local path does not exist.
+        ValueError: Download failed or bytes do not decode as an image.
+
+    Returns:
+        PIL.Image: Oriented, opaque RGB-ready image.
+    """
+    try:
+        return prepare_image(open_raw(source, timeout))
+    except (FileNotFoundError, ValueError):
+        raise
     except Exception as error:
         raise ValueError(f"Error opening image: {error}")

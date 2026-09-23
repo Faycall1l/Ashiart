@@ -113,6 +113,87 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertTrue(all(len(line) == 40 for line in buffer.getvalue().split("\n") if line))
 
+    def _write_gif(self):
+        black = Image.new("RGB", (8, 8), color="black")
+        white = Image.new("RGB", (8, 8), color="white")
+        path = os.path.join(self.temp_dir.name, "anim.gif")
+        black.save(path, save_all=True, append_images=[white],
+                   duration=[50, 50], loop=0)
+        return path
+
+    def test_play_gif_loops_once(self):
+        """--play --loop 1 must render every frame and stop."""
+        import contextlib
+        import io as stdlib_io
+
+        buffer = stdlib_io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            result = main([self._write_gif(), "--play", "--loop", "1",
+                           "-w", "8", "-H", "4"])
+        self.assertEqual(result, 0)
+        self.assertIn("\x1b[2J", buffer.getvalue())
+
+    def test_play_with_html_exports_animation(self):
+        """--play --html must write a looping HTML file."""
+        import contextlib
+        import io as stdlib_io
+
+        html_path = os.path.join(self.temp_dir.name, "anim.html")
+        buffer = stdlib_io.StringIO()
+        with contextlib.redirect_stdout(buffer):
+            result = main([self._write_gif(), "--play", "--loop", "1",
+                           "-w", "8", "-H", "4", "--html", html_path])
+        self.assertEqual(result, 0)
+        with open(html_path, encoding="utf-8") as file:
+            self.assertIn("setTimeout", file.read())
+
+    def test_video_without_extra_fails_cleanly(self):
+        """mp4 input without OpenCV must exit 1 with guidance."""
+        movie = os.path.join(self.temp_dir.name, "movie.mp4")
+        with open(movie, "wb") as file:
+            file.write(b"not a video")
+        with patch.dict(sys.modules, {"cv2": None}):
+            with patch("sys.stderr"):
+                with patch("builtins.print") as mock_print:
+                    result = main([movie, "--play"])
+        self.assertEqual(result, 1)
+        self.assertIn("ashiart[video]", mock_print.call_args[0][0])
+
+    def test_webcam_streams_until_device_ends(self):
+        """--webcam must render stubbed frames then stop at end of stream."""
+        import contextlib
+        import io as stdlib_io
+        import numpy as np
+
+        class Capture:
+            def __init__(self, *args):
+                self.calls = 0
+
+            def read(self):
+                self.calls += 1
+                if self.calls > 2:
+                    return False, None
+                return True, np.zeros((8, 8, 3), dtype=np.uint8)
+
+            def release(self):
+                pass
+
+        class FakeCv2:
+            COLOR_BGR2RGB = 4
+
+            def VideoCapture(self, *args):
+                return Capture()
+
+            def cvtColor(self, frame, code):
+                return frame[:, :, ::-1]
+
+        buffer = stdlib_io.StringIO()
+        with patch.dict(sys.modules, {"cv2": FakeCv2()}):
+            with contextlib.redirect_stdout(buffer):
+                result = main(["--webcam", "-w", "8", "-H", "4"])
+        self.assertEqual(result, 0)
+        self.assertIn("\x1b[2J", buffer.getvalue())
+
     @patch('sys.argv')
     @patch('builtins.print')
     def test_main_with_output_file(self, mock_print, mock_argv):

@@ -28,6 +28,7 @@
 - [Rendering modes](#rendering-modes)
 - [Character ramp](#character-ramp)
 - [How it works](#how-it-works)
+- [Animation](#animation)
 - [Examples](#examples)
 - [Project structure](#project-structure)
 - [Development](#development)
@@ -206,6 +207,10 @@ print(art)
 | `--dithering` | off | Apply dithering for texture |
 | `--invert` | off | Invert brightness mapping |
 | `--color` | off | Emit ANSI truecolor escape codes |
+| `--play` | off | Play GIF/video input as a looping ASCII animation |
+| `--webcam` | off | Live ASCII from a webcam device (default: 0, Ctrl-C stops) |
+| `--loop` | `0` | Animation loop count, 0 loops forever |
+| `--max-fps` | `30` | Animation frame-rate cap |
 | `--html PATH` | none | Write color HTML rendering to `PATH` |
 | `--open` | off | Open the `--html` output in a browser (requires `--html`) |
 | `--font-size` | `8` | HTML font size in pixels |
@@ -327,6 +332,34 @@ a 2×4 block per cell). The pipeline, in order:
    at 128 instead.
 6. **Emit.** Plain text, ANSI truecolor foreground per cell, or HTML
    `<span>` elements preserving the enhanced per-cell color.
+
+## Animation
+
+GIFs play frame by frame at their native frame durations; video files
+(mp4, avi, mov, mkv, webm) decode through OpenCV (`pip install
+ashiart[video]`); `--webcam` streams a live camera. All modes,
+enhancements, and `--color` apply per frame.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/demo.gif" width="360" alt="Amber ball sliding across a dark grid, source for the animation demo" />
+</p>
+
+```bash
+# Loop a GIF in the terminal (Ctrl-C stops)
+ashiart docs/images/demo.gif --play --width 60
+
+# Two loops, then exit
+ashiart docs/images/demo.gif --play --loop 2 --width 60
+
+# A video file (needs the video extra)
+ashiart movie.mp4 --play --width 100
+
+# Live webcam, mirrored selfie view
+ashiart --webcam --width 100 --color
+
+# Export the animation as a self-contained looping HTML page
+ashiart docs/images/demo.gif --play --loop 1 --html animation.html
+```
 
 ## Examples
 

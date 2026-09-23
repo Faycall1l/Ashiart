@@ -10,6 +10,8 @@ import webbrowser
 from .enhanced import EnhancedAsciiArtGenerator
 from .io import demo_image
 
+VIDEO_EXTENSIONS = {".mp4", ".avi", ".mov", ".mkv", ".webm"}
+
 
 def _demo_path():
     """Procedural demo image, written once to the system temp directory."""
@@ -17,6 +19,79 @@ def _demo_path():
     if not os.path.exists(path):
         demo_image().save(path)
     return path
+
+
+def _is_video_source(source):
+    """File extensions that need frame decoding instead of Pillow."""
+    return isinstance(source, str) and os.path.splitext(source)[1].lower() in VIDEO_EXTENSIONS
+
+
+def _fit_playback_width(source, width):
+    """Shrink animation width so proportional rows fit the terminal.
+
+    Only local Pillow-decodable files can be measured upfront; webcam,
+    video, and remote sources keep the requested width.
+    """
+    if _is_video_source(source) or not isinstance(source, str):
+        return width
+    try:
+        from .io import open_image
+        with open_image(source) as probe:
+            img_w, img_h = probe.size
+    except (FileNotFoundError, ValueError, OSError):
+        return width
+    try:
+        term_rows = shutil.get_terminal_size().rows
+    except OSError:
+        return width
+    rows = int(img_h * width / img_w * 0.5)
+    cap = max(term_rows - 4, 1)
+    return max(int(width * cap / rows), 1) if rows > cap else width
+
+
+def _render_frames(generator, pil_frames, ansi):
+    """Convert (frame, duration_ms) pairs to (text, duration_ms) pairs."""
+    return [(generator.generate_from_pil_image(frame, ansi=ansi), duration)
+            for frame, duration in pil_frames]
+
+
+def _play_webcam(generator, args):
+    """Stream webcam frames as ASCII until the device ends or Ctrl-C."""
+    from .video import iter_webcam_frames
+    from .animate import CLEAR_SCREEN, CURSOR_HOME
+
+    sys.stdout.write(CLEAR_SCREEN)
+    try:
+        for frame in iter_webcam_frames(args.webcam):
+            sys.stdout.write(CURSOR_HOME)
+            sys.stdout.write(generator.generate_from_pil_image(frame, ansi=args.color))
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+    except KeyboardInterrupt:
+        pass
+    return 0
+
+
+def _play_animation_source(generator, args, source):
+    """Play GIF frames or video files as a looping ASCII animation."""
+    from .animate import iter_gif_frames, play_animation, save_animation_html
+
+    if _is_video_source(source):
+        from .video import iter_video_frames
+        pil_frames = list(iter_video_frames(source))
+    else:
+        pil_frames = iter_gif_frames(source)
+    if not pil_frames:
+        raise ValueError("No frames found in animation input")
+    texts = _render_frames(generator, pil_frames, args.color)
+    durations = [duration for _, duration in pil_frames]
+    if args.html:
+        save_animation_html([text for text, _ in texts], args.html,
+                            durations, args.font_size)
+        print(f"Animation HTML saved to {args.html}")
+    play_animation([text for text, _ in texts], durations,
+                   loops=args.loop, max_fps=args.max_fps)
+    return 0
 
 
 def build_parser():
@@ -74,6 +149,15 @@ def build_parser():
                         help="Invert brightness mapping")
     parser.add_argument("--color", action="store_true",
                         help="ANSI truecolor terminal output")
+    parser.add_argument("--play", action="store_true",
+                        help="Play GIF/video input as a looping ASCII animation")
+    parser.add_argument("--webcam", nargs="?", const=0, default=None, type=int,
+                        metavar="INDEX",
+                        help="Live ASCII from a webcam device (default: 0, Ctrl-C stops)")
+    parser.add_argument("--loop", type=int, default=0,
+                        help="Animation loop count, 0 loops forever (default: 0)")
+    parser.add_argument("--max-fps", type=float, default=30,
+                        help="Animation frame-rate cap (default: 30)")
     parser.add_argument("--html",
                         metavar="PATH",
                         help="Also write color HTML output to PATH")
@@ -97,8 +181,8 @@ def main(argv=None):
 
     if args.demo:
         source = _demo_path()
-    elif not args.image_path:
-        parser.error("an image path, URL, - for stdin, or --demo is required")
+    elif not args.image_path and args.webcam is None:
+        parser.error("an image path, URL, - for stdin, --demo, or --webcam is required")
     elif args.image_path == "-":
         source = sys.stdin.buffer.read()
     else:
@@ -110,6 +194,8 @@ def main(argv=None):
             width = shutil.get_terminal_size().columns if sys.stdout.isatty() else 100
         except OSError:
             width = 100
+    if (args.play or args.webcam is not None) and args.height is None:
+        width = _fit_playback_width(source, width)
     chars = list(args.chars) if args.chars else None
     generator = EnhancedAsciiArtGenerator(
         chars=chars,
@@ -130,6 +216,10 @@ def main(argv=None):
     )
 
     try:
+        if args.webcam is not None:
+            return _play_webcam(generator, args)
+        if args.play or _is_video_source(source):
+            return _play_animation_source(generator, args, source)
         ascii_art = generator.generate_from_image(source, ansi=args.color)
 
         if args.html:

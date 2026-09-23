@@ -8,6 +8,9 @@ setup(
         "pillow>=10.0.0",
         "numpy>=1.20.0",
     ],
+    extras_require={
+        "video": ["opencv-python>=4.8.0"],
+    },
     entry_points={
         'console_scripts': [
             'ashiart=ashiart.cli:main',

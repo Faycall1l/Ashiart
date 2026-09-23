@@ -19,6 +19,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `--demo` renders a procedural calibration image with zero setup;
   `--open` opens `--html` output in a browser
 - Default width follows the terminal size on ttys (100 elsewhere)
+- Animation: GIF playback (`--play`, native frame durations, `--loop`,
+  `--max-fps`), video files via optional `ashiart[video]` extra, live
+  `--webcam` streaming, self-contained looping HTML export, terminal-fit
+  playback sizing, `docs/images/demo.gif` sample
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);
