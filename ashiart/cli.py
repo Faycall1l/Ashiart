@@ -12,7 +12,7 @@ def build_parser():
         prog="ashiart",
         description="Convert images to ASCII art (terminal, text or HTML)",
     )
-    parser.add_argument("image_path", help="Path to the image file")
+    parser.add_argument("image_path", help="Local image path or http(s) URL")
     parser.add_argument(
         "-o", "--output",
         help="Path to save the ASCII art output (if not provided, prints to console)"

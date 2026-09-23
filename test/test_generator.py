@@ -125,6 +125,35 @@ class TestAsciiArtGenerator(unittest.TestCase):
         with self.assertRaises(FileNotFoundError):
             self.generator.generate_from_image("nonexistent_file.jpg")
 
+    def test_generate_from_url(self):
+        """Images served over HTTP must convert like local files."""
+        import functools
+        import http.server
+        import threading
+
+        handler = functools.partial(
+            http.server.SimpleHTTPRequestHandler, directory=self.temp_dir.name
+        )
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            port = server.server_address[1]
+            art = self.generator.generate_from_image(
+                f"http://127.0.0.1:{port}/test_image.png"
+            )
+        finally:
+            server.shutdown()
+            thread.join()
+        lines = art.strip("\n").split("\n")
+        self.assertEqual(len(lines), 5)
+        self.assertTrue(all(len(line) == 10 for line in lines))
+
+    def test_bad_url_raises_value_error(self):
+        """Unreachable hosts and non-image bytes raise ValueError."""
+        with self.assertRaises(ValueError):
+            self.generator.generate_from_image("http://127.0.0.1:1/nope.png")
+
     def test_image_to_ascii_function(self):
         """Test the convenience function."""
         ascii_art = image_to_ascii(self.test_image_path, width=10, height=5)

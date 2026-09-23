@@ -1,7 +1,12 @@
-"""ASCII Art Generator module."""
+"""Single-ramp image-to-ASCII conversion.
 
-import os
+Exports AsciiArtGenerator, the NumPy-free converter used directly and
+as the fallback when enhanced dependencies are unavailable.
+"""
+
 from PIL import Image, ImageOps
+
+from .io import open_image
 
 
 class AsciiArtGenerator:
@@ -76,14 +81,12 @@ class AsciiArtGenerator:
         width = image.width
         ascii_image = []
         
-        # Split the pixel list into rows
         for i in range(0, len(pixels), width):
             row = pixels[i:i + width]
             ascii_row = []
             
             for pixel in row:
-                # Map pixel value (0-255) to a ramp index; round (not trunc)
-                # so each character owns a symmetric brightness bucket.
+                # Round so buckets stay symmetric; clamp for short custom ramps.
                 index = round(pixel * (len(self.chars) - 1) / 255)
                 index = max(0, min(index, len(self.chars) - 1))
                 ascii_row.append(self.chars[index])
@@ -97,30 +100,22 @@ class AsciiArtGenerator:
         Generate ASCII art from an image file.
         
         Args:
-            image_path (str): Path to the image file.
+            image_path (str): Local path or http(s) URL.
             color (bool, optional): Wrap characters in ANSI truecolor codes
-                sampled from the original image. Defaults to False.
+                sampled after resizing. Defaults to False.
             
         Returns:
             str: ASCII art as a string.
         """
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image file not found: {image_path}")
-        
-        try:
-            image = Image.open(image_path)
-        except Exception as e:
-            raise ValueError(f"Error opening image: {e}")
+        image = open_image(image_path)
         
         if color:
             return self.generate_ansi_from_pil_image(image)
 
-        # Process the image
         image = self._resize_image(image)
         grayscale_image = self._convert_to_grayscale(image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         
-        # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
     def generate_from_pil_image(self, image, color=False):
@@ -137,12 +132,10 @@ class AsciiArtGenerator:
         """
         if color:
             return self.generate_ansi_from_pil_image(image)
-        # Process the image
         image = self._resize_image(image)
         grayscale_image = self._convert_to_grayscale(image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         
-        # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
     def generate_ansi_from_pil_image(self, image):

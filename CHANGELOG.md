@@ -7,6 +7,10 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Added
 
+- Image URLs as input: local paths and http(s) URLs work interchangeably
+  in the CLI, `image_to_ascii`, and `generate_html` (stdlib download,
+  no new dependency)
+
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);
   works in text, ANSI, and HTML paths (not braille)

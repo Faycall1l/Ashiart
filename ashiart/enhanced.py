@@ -1,13 +1,17 @@
-"""Enhanced ASCII Art Generator with advanced features."""
+"""Rendering modes, tonal controls, and Sobel edge overlay for ASCII art.
 
-import os
-import math
+Exports EnhancedAsciiArtGenerator, the image_to_ascii entry point,
+and the image_to_html_ascii HTML helper.
+"""
+
 import numpy as np
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 
+from .io import open_image
+
 
 class EnhancedAsciiArtGenerator:
-    """An enhanced ASCII art generator with advanced features."""
+    """Image-to-ASCII converter with modes, tonal controls, and edge overlay."""
 
     # Default ASCII characters from darkest to lightest (trailing space =
     # paper white, matching the canonical density ramps)
@@ -344,25 +348,18 @@ class EnhancedAsciiArtGenerator:
         Generate ASCII art from an image file.
         
         Args:
-            image_path (str): Path to the image file.
+            image_path (str): Local path or http(s) URL.
             ansi (bool, optional): Wrap characters in ANSI truecolor codes.
                 Defaults to False.
             
         Returns:
             str: ASCII art as a string.
         """
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image file not found: {image_path}")
-        
-        try:
-            image = Image.open(image_path)
-        except Exception as e:
-            raise ValueError(f"Error opening image: {e}")
+        image = open_image(image_path)
 
         if ansi:
             return self.generate_ansi_from_pil_image(image)
         
-        # Process the image
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
@@ -374,7 +371,6 @@ class EnhancedAsciiArtGenerator:
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         ascii_image = self._overlay_edges(ascii_image, edge_grid)
         
-        # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
     def generate_from_pil_image(self, image, ansi=False):
@@ -391,7 +387,6 @@ class EnhancedAsciiArtGenerator:
         """
         if ansi:
             return self.generate_ansi_from_pil_image(image)
-        # Process the image
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
@@ -403,7 +398,6 @@ class EnhancedAsciiArtGenerator:
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
         ascii_image = self._overlay_edges(ascii_image, edge_grid)
         
-        # Convert 2D list to string
         return "\n".join("".join(row) for row in ascii_image)
 
     def generate_ansi_from_pil_image(self, image):
@@ -457,25 +451,18 @@ class EnhancedAsciiArtGenerator:
         Generate HTML representation of the ASCII art with optional color.
         
         Args:
-            image_path (str): Path to the image file.
+            image_path (str): Local path or http(s) URL.
             font_size (int, optional): Font size in pixels. Defaults to 10.
             font_family (str, optional): Font family. Defaults to "monospace".
             preserve_color (bool, optional): Whether to preserve the original colors.
-                                          Defaults to False.
+                                           Defaults to False.
         
         Returns:
             str: HTML string representing the ASCII art.
         """
-        if not os.path.exists(image_path):
-            raise FileNotFoundError(f"Image file not found: {image_path}")
+        image = open_image(image_path)
+        original_image = image.copy()
         
-        try:
-            image = Image.open(image_path)
-            original_image = image.copy()
-        except Exception as e:
-            raise ValueError(f"Error opening image: {e}")
-        
-        # Process the image for ASCII mapping
         image = self._resize_image(image)
         image = self._enhance_image(image)
         grayscale_image = self._convert_to_grayscale(image)
@@ -484,9 +471,7 @@ class EnhancedAsciiArtGenerator:
         if self.dithering:
             grayscale_image = self._apply_dithering(grayscale_image)
         
-        # Get pixel data
         if preserve_color:
-            # Resize the original image to match our processed dimensions
             color_image = self._resize_image(original_image)
             color_pixels = np.array(color_image)
         
@@ -517,7 +502,6 @@ class EnhancedAsciiArtGenerator:
 <pre>
 """
         
-        # Map pixels to ASCII
         height, width = gray_pixels.shape
         
         for y in range(height):
@@ -531,7 +515,6 @@ class EnhancedAsciiArtGenerator:
                     char = self.chars[index]
                 
                 if preserve_color and len(color_pixels.shape) > 2:
-                    # Get the RGB color for this pixel
                     r, g, b = color_pixels[y, x][:3]
                     color = f"#{r:02x}{g:02x}{b:02x}"
                     html += f'<span style="color:{color}">{char}</span>'

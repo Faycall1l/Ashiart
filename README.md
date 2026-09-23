@@ -42,7 +42,7 @@ documents, and color-preserving HTML pages. Each output cell encodes the
 brightness — and optionally the contour direction — of its source pixels.
 
 Decodes any image format Pillow supports, including JPEG, PNG, BMP, GIF,
-and WebP.
+and WebP — from a local path or directly from an http(s) URL.
 
 Sample output (`docs/images/puppy.jpg`, width 60, standard mode with
 edge overlay — contours drawn from Sobel orientation):
@@ -146,6 +146,12 @@ Print ASCII art to the terminal:
 ashiart docs/images/sample.jpg --width 80
 ```
 
+No local file needed — URLs download on the fly:
+
+```bash
+ashiart https://picsum.photos/id/237/1200/800 --width 80
+```
+
 Save plain-text output and a color HTML rendering in one run:
 
 ```bash
@@ -177,7 +183,7 @@ print(art)
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `image_path` | required | Input image path |
+| `image_path` | required | Local path or http(s) URL |
 | `-o, --output` | console | Text output file; prints to stdout when omitted |
 | `-w, --width` | `100` | Output width in characters |
 | `-H, --height` | proportional | Output height in characters |
