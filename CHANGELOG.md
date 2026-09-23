@@ -25,6 +25,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   playback sizing, `docs/images/demo.gif` sample
 - Tonal controls: `--gamma` curve exponent and `--resample lanczos|box`
   downsampling choice; HTML `--bg black|white` page background
+- Vectorized char mapping with 256-entry LUT semantics plus
+  `examples/benchmark.py` throughput harness
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);

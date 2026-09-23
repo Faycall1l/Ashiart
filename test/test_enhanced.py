@@ -229,6 +229,21 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         self.assertNotIn("/", glyphs)
         self.assertNotIn("\\", glyphs)
 
+    def test_vectorized_mapping_matches_scalar_buckets(self):
+        """Vectorized LUT mapping must equal the scalar round() buckets."""
+        from PIL import Image as PILImage
+
+        gen = EnhancedAsciiArtGenerator(width=8, height=4)
+        data = [(x * 37 + y * 91) % 256 for y in range(4) for x in range(8)]
+        img = PILImage.new("L", (8, 4))
+        img.putdata(data)
+        rows = gen._map_pixels_to_ascii_standard(img)
+        slots = len(gen.chars) - 1
+        expected = "".join(
+            gen.chars[max(0, min(round(v * slots / 255), slots))] for v in data
+        )
+        self.assertEqual("".join(rows), expected)
+
     def test_edge_overlay_keeps_dimensions(self):
         """Edge overlay must not change output geometry."""
         gen = EnhancedAsciiArtGenerator(width=10, height=5)

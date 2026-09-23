@@ -275,27 +275,15 @@ class EnhancedAsciiArtGenerator:
             image (PIL.Image): The grayscale image.
             
         Returns:
-            list: 2D list of ASCII characters.
+            list: Rows of ASCII characters.
         """
-        pixels = list(image.getdata())
-        width = image.width
-        ascii_image = []
-        
-        # Split the pixel list into rows
-        for i in range(0, len(pixels), width):
-            row = pixels[i:i + width]
-            ascii_row = []
-            
-            for pixel in row:
-                # Map pixel value (0-255) to a ramp index; round (not trunc)
-                # so each character owns a symmetric brightness bucket.
-                index = round(pixel * (len(self.chars) - 1) / 255)
-                index = max(0, min(index, len(self.chars) - 1))
-                ascii_row.append(self.chars[index])
-            
-            ascii_image.append(ascii_row)
-        
-        return ascii_image
+        gray = np.asarray(image, dtype=np.float64)
+        slots = len(self.chars) - 1
+        # 256-entry LUT semantics, vectorized: identical buckets to the
+        # scalar round() mapping, one pass over the frame.
+        indices = np.round(gray * slots / 255).astype(int)
+        np.clip(indices, 0, slots, out=indices)
+        return ["".join(row) for row in np.array(self.chars)[indices]]
 
     def _map_pixels_to_ascii_braille(self, image):
         """
