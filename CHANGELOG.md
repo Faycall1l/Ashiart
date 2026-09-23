@@ -10,6 +10,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Image URLs as input: local paths and http(s) URLs work interchangeably
   in the CLI, `image_to_ascii`, and `generate_html` (stdlib download,
   no new dependency)
+- Transparency compositing: RGBA, LA, and paletted images with alpha
+  flatten onto white instead of decoding transparent pixels as black
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);

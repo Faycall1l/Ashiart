@@ -7,6 +7,30 @@ import urllib.request
 from PIL import Image
 
 _USER_AGENT = "ashiart"
+_FLAT_BACKGROUND = (255, 255, 255)
+
+
+def flatten_alpha(image, background=_FLAT_BACKGROUND):
+    """Composite transparent pixels onto an opaque background.
+
+    RGBA, LA, and paletted images carrying transparency are flattened;
+    anything else passes through untouched.
+
+    Args:
+        image (PIL.Image): The decoded image.
+        background (tuple): RGB backdrop for transparent pixels.
+
+    Returns:
+        PIL.Image: Opaque RGB image, or the input unchanged.
+    """
+    if image.mode in ("RGBA", "LA") or (
+        image.mode == "P" and "transparency" in image.info
+    ):
+        alpha = image.convert("RGBA").split()[-1]
+        base = Image.new("RGBA", image.size, background + (255,))
+        base.paste(image, mask=alpha)
+        return base.convert("RGB")
+    return image
 
 
 def open_image(source, timeout=15):
@@ -35,10 +59,10 @@ def open_image(source, timeout=15):
             image.load()
         except Exception as error:
             raise ValueError(f"Downloaded bytes are not an image: {error}")
-        return image
+        return flatten_alpha(image)
     if not os.path.exists(source):
         raise FileNotFoundError(f"Image file not found: {source}")
     try:
-        return Image.open(source)
+        return flatten_alpha(Image.open(source))
     except Exception as error:
         raise ValueError(f"Error opening image: {error}")

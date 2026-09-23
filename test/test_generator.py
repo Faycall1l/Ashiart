@@ -154,6 +154,35 @@ class TestAsciiArtGenerator(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.generator.generate_from_image("http://127.0.0.1:1/nope.png")
 
+    def _transparent_fixture(self):
+        """Left half transparent, right half opaque black."""
+        img = Image.new("RGBA", (8, 4), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rectangle([(4, 0), (7, 3)], fill=(0, 0, 0, 255))
+        return img
+
+    def test_transparent_pixels_composite_onto_white(self):
+        """Transparency must flatten to white, not decode as black."""
+        gen = AsciiArtGenerator(width=8, height=4, autocontrast=False)
+        for art in (
+            gen.generate_from_pil_image(self._transparent_fixture()),
+            gen.generate_from_image(self._save_fixture()),
+        ):
+            for line in art.split("\n"):
+                self.assertEqual(line[:4], " " * 4)
+                self.assertEqual(line[4:], "@" * 4)
+
+    def _save_fixture(self):
+        path = os.path.join(self.temp_dir.name, "alpha.png")
+        self._transparent_fixture().save(path)
+        return path
+
+    def test_flatten_alpha_passes_opaque_through(self):
+        """Images without alpha come back untouched."""
+        from ashiart.io import flatten_alpha
+        rgb = Image.new("RGB", (4, 4), color="red")
+        self.assertIs(flatten_alpha(rgb), rgb)
+
     def test_image_to_ascii_function(self):
         """Test the convenience function."""
         ascii_art = image_to_ascii(self.test_image_path, width=10, height=5)

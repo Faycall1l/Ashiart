@@ -294,7 +294,8 @@ a 2×4 block per cell). The pipeline, in order:
    height-to-width ratio of monospace glyphs; `--height` overrides it.
 2. **Enhance.** Contrast, brightness, and sharpness multipliers, then an
    edge-enhancement filter and optional inversion. All default to neutral.
-3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
+3. **Grayscale.** Transparent pixels composite onto white first.
+   PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
    default, stretches the used range to 0–255 with a 1% cutoff so the
    full ramp is exercised.
 4. **Edge field (optional, `--edges`).** 3×3 Sobel gradients per cell,
