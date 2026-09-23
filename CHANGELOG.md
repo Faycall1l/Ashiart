@@ -27,6 +27,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   downsampling choice; HTML `--bg black|white` page background
 - Vectorized char mapping with 256-entry LUT semantics plus
   `examples/benchmark.py` throughput harness
+- `ashiart/tonal.py`: NumPy CLAHE (`--clahe`) and Difference-of-Gaussians
+  (`--dog SMALL LARGE AMPLIFY`) detail operators, dependency-free
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);

@@ -149,6 +149,11 @@ def build_parser():
                         help="Disable automatic level stretching")
     parser.add_argument("--dithering", action="store_true",
                         help="Apply dithering for more texture")
+    parser.add_argument("--clahe", action="store_true",
+                        help="Local contrast equalization for flat photos")
+    parser.add_argument("--dog", nargs=3, type=float, default=None,
+                        metavar=("SMALL", "LARGE", "AMPLIFY"),
+                        help="Difference-of-Gaussians detail emphasis, e.g. --dog 0.8 2.0 2.0")
     parser.add_argument("--invert", action="store_true",
                         help="Invert brightness mapping")
     parser.add_argument("--color", action="store_true",
@@ -220,6 +225,8 @@ def main(argv=None):
         edge_enhance=args.edge_enhance,
         edges=args.edges,
         edge_threshold=args.edge_threshold,
+        clahe=args.clahe,
+        dog=tuple(args.dog) if args.dog else None,
         invert=args.invert,
     )
 

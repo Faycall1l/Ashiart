@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image, ImageOps, ImageEnhance, ImageFilter
 
 from .io import open_image, prepare_image
+from .tonal import apply_clahe, apply_dog
 
 
 class EnhancedAsciiArtGenerator:
@@ -72,12 +73,14 @@ class EnhancedAsciiArtGenerator:
         self.edge_enhance = False
         self.edges = False
         self.edge_threshold = 0.35
+        self.clahe = False
+        self.dog = None
         self.invert = False
 
     def set_enhancement(self, contrast=None, brightness=None, sharpness=None, 
                         gamma=None, autocontrast=None, dithering=None,
                         edge_enhance=None, edges=None, edge_threshold=None,
-                        invert=None):
+                        clahe=None, dog=None, invert=None):
         """
         Set image enhancement parameters.
         
@@ -95,6 +98,10 @@ class EnhancedAsciiArtGenerator:
                 (Sobel orientation) on strong contours.
             edge_threshold (float, optional): Normalized Sobel magnitude
                 (0-1) above which a cell becomes an edge glyph.
+            clahe (bool, optional): Local contrast equalization for flat
+                photos. Defaults to False.
+            dog (tuple, optional): (small, large, amplify) sigmas for
+                Difference-of-Gaussians detail emphasis. Defaults to None.
             invert (bool, optional): Whether to invert the image.
         """
         if contrast is not None:
@@ -117,6 +124,10 @@ class EnhancedAsciiArtGenerator:
             self.edges = edges
         if edge_threshold is not None:
             self.edge_threshold = edge_threshold
+        if clahe is not None:
+            self.clahe = clahe
+        if dog is not None:
+            self.dog = dog
         if invert is not None:
             self.invert = invert
 
@@ -187,8 +198,12 @@ class EnhancedAsciiArtGenerator:
             PIL.Image: The grayscale image.
         """
         gray = image.convert("L")
+        if self.dog is not None:
+            gray = apply_dog(gray, *self.dog)
         if self.autocontrast:
             gray = ImageOps.autocontrast(gray, cutoff=1)
+        if self.clahe:
+            gray = apply_clahe(gray)
         if self.gamma != 1.0:
             lut = [round(255 * (level / 255) ** self.gamma) for level in range(256)]
             gray = gray.point(lut)
@@ -571,7 +586,7 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
                    chars=None, resample="lanczos", contrast=1.0, brightness=1.0,
                    sharpness=1.0, gamma=1.0,
                    autocontrast=True, dithering=False, edge_enhance=False,
-                   edges=False, edge_threshold=0.35,
+                   edges=False, edge_threshold=0.35, clahe=False, dog=None,
                    invert=False, ansi=False):
     """
     Convert an image to ASCII art (single entry point).
@@ -593,6 +608,8 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
         edge_enhance (bool, optional): Whether to enhance edges.
         edges (bool, optional): Overlay directional edge glyphs on contours.
         edge_threshold (float, optional): Normalized Sobel magnitude gate.
+        clahe (bool, optional): Local contrast equalization.
+        dog (tuple, optional): (small, large, amplify) DoG sigmas.
         invert (bool, optional): Whether to invert the image.
         ansi (bool, optional): Wrap output in ANSI truecolor codes.
         
@@ -607,7 +624,8 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
                             autocontrast=autocontrast,
                             dithering=dithering, 
                             edge_enhance=edge_enhance, edges=edges,
-                            edge_threshold=edge_threshold, invert=invert)
+                            edge_threshold=edge_threshold, clahe=clahe,
+                            dog=dog, invert=invert)
     return generator.generate_from_image(image_path, ansi=ansi)
 
 

@@ -98,6 +98,18 @@ class TestCLI(unittest.TestCase):
         mock_open.assert_called_once()
         self.assertTrue(mock_open.call_args[0][0].startswith("file://"))
 
+    def test_tonal_flags_run(self):
+        """--clahe, --dog, --gamma, --resample, --bg must all be accepted."""
+        html_path = os.path.join(self.temp_dir.name, "tonal.html")
+        with patch("builtins.print"):
+            result = main([self.test_image_path, "-w", "8", "-H", "4",
+                           "--clahe", "--dog", "0.8", "2.0", "2.0",
+                           "--gamma", "1.2", "--resample", "box",
+                           "--html", html_path, "--bg", "white"])
+        self.assertEqual(result, 0)
+        with open(html_path, encoding="utf-8") as file:
+            self.assertIn("background-color: white", file.read())
+
     def test_width_defaults_to_terminal_size(self):
         """No -w on a tty must use the terminal width."""
         import contextlib

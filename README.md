@@ -104,8 +104,9 @@ ashiart docs/images/puppy-head.jpg --width 70 --mode dense --color
 - Sobel edge overlay: strong contours drawn as directional `- / | \` glyphs
 - ANSI truecolor terminal output, per-cell color sampled after enhancement
 - Color-preserving HTML export with configurable font size
-- Tonal controls: contrast, brightness, sharpness, autocontrast
-  (level stretching, on by default), dithering, inversion
+- Tonal controls: contrast, brightness, sharpness, gamma, autocontrast
+  (level stretching, on by default), CLAHE local equalization,
+  Difference-of-Gaussians detail emphasis, dithering, inversion
 - Custom character ramps, ordered darkest to lightest
 - Command-line interface and importable Python API
 - Cross-platform: macOS, Linux, and Windows
@@ -207,6 +208,8 @@ print(art)
 | `--edge-threshold` | `0.35` | Normalized Sobel magnitude gate for `--edges` |
 | `--no-autocontrast` | off | Disable automatic level stretching |
 | `--dithering` | off | Apply dithering for texture |
+| `--clahe` | off | Local contrast equalization for flat photos |
+| `--dog` | off | DoG detail emphasis: `--dog SMALL LARGE AMPLIFY` |
 | `--invert` | off | Invert brightness mapping |
 | `--color` | off | Emit ANSI truecolor escape codes |
 | `--play` | off | Play GIF/video input as a looping ASCII animation |
@@ -313,11 +316,11 @@ a 2×4 block per cell). The pipeline, in order:
    `height × width / image_width × 0.5`, compensating the ~2:1
    height-to-width ratio of monospace glyphs; `--height` overrides it.
 2. **Enhance.** Contrast, brightness, sharpness, and gamma multipliers,
-   then an edge-enhancement filter and optional inversion. All default
-   to neutral.
+   Difference-of-Gaussians detail emphasis, then an edge-enhancement
+   filter and optional inversion. All default to neutral.
 3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
-   default, stretches the used range to 0–255 with a 1% cutoff so the
-   full ramp is exercised.
+   default, stretches the used range to 0–255 with a 1% cutoff;
+   optional CLAHE then equalizes local contrast tile by tile.
 4. **Edge field (optional, `--edges`).** 3×3 Sobel gradients per cell,
    magnitude normalized by the frame peak. Cells at or above
    `--edge-threshold` (default 0.35) take a contour glyph from the
