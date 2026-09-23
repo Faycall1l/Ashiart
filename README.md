@@ -200,6 +200,8 @@ print(art)
 | `--contrast` | `1.0` | Contrast multiplier |
 | `--brightness` | `1.0` | Brightness multiplier |
 | `--sharpness` | `1.0` | Sharpness multiplier |
+| `--gamma` | `1.0` | Tonal curve exponent, >1 darkens midtones |
+| `--resample` | `lanczos` | Downsampling filter: `lanczos` or `box` (area average) |
 | `--edge-enhance` | off | PIL edge-enhancement filter before mapping |
 | `--edges` | off | Sobel overlay: contours as `- / | \` glyphs |
 | `--edge-threshold` | `0.35` | Normalized Sobel magnitude gate for `--edges` |
@@ -212,6 +214,7 @@ print(art)
 | `--loop` | `0` | Animation loop count, 0 loops forever |
 | `--max-fps` | `30` | Animation frame-rate cap |
 | `--html PATH` | none | Write color HTML rendering to `PATH` |
+| `--bg` | `black` | HTML page background: `black` or `white` |
 | `--open` | off | Open the `--html` output in a browser (requires `--html`) |
 | `--font-size` | `8` | HTML font size in pixels |
 
@@ -305,11 +308,13 @@ a 2×4 block per cell). The pipeline, in order:
 0. **Load.** Decode from a local path or http(s) URL, apply EXIF
    orientation so phone photos render upright, and composite
    transparency onto white.
-1. **Resample.** LANCZOS downscale to `width` columns. Rows default to
+1. **Resample.** LANCZOS downscale (`--resample box` switches to area
+   averaging) to `width` columns. Rows default to
    `height × width / image_width × 0.5`, compensating the ~2:1
    height-to-width ratio of monospace glyphs; `--height` overrides it.
-2. **Enhance.** Contrast, brightness, and sharpness multipliers, then an
-   edge-enhancement filter and optional inversion. All default to neutral.
+2. **Enhance.** Contrast, brightness, sharpness, and gamma multipliers,
+   then an edge-enhancement filter and optional inversion. All default
+   to neutral.
 3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
    default, stretches the used range to 0–255 with a 1% cutoff so the
    full ramp is exercised.

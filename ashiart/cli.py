@@ -87,7 +87,7 @@ def _play_animation_source(generator, args, source):
     durations = [duration for _, duration in pil_frames]
     if args.html:
         save_animation_html([text for text, _ in texts], args.html,
-                            durations, args.font_size)
+                            durations, args.font_size, bg=args.bg)
         print(f"Animation HTML saved to {args.html}")
     play_animation([text for text, _ in texts], durations,
                    loops=args.loop, max_fps=args.max_fps)
@@ -135,6 +135,10 @@ def build_parser():
                         help="Brightness adjustment, 1.0 is neutral (default: 1.0)")
     parser.add_argument("--sharpness", type=float, default=1.0,
                         help="Sharpness adjustment, 1.0 is neutral (default: 1.0)")
+    parser.add_argument("--gamma", type=float, default=1.0,
+                        help="Tonal curve exponent, >1 darkens midtones (default: 1.0)")
+    parser.add_argument("--resample", choices=["lanczos", "box"], default="lanczos",
+                        help="Downsampling filter (default: lanczos)")
     parser.add_argument("--edge-enhance", action="store_true",
                         help="PIL edge-enhancement filter before mapping")
     parser.add_argument("--edges", action="store_true",
@@ -165,6 +169,8 @@ def build_parser():
                         help="Open the --html output in a browser (requires --html)")
     parser.add_argument("--font-size", type=int, default=8,
                         help="Font size for HTML output (default: 8)")
+    parser.add_argument("--bg", choices=["black", "white"], default="black",
+                        help="HTML page background (default: black)")
     return parser
 
 
@@ -202,11 +208,13 @@ def main(argv=None):
         width=width,
         height=args.height,
         mode=args.mode,
+        resample=args.resample,
     )
     generator.set_enhancement(
         contrast=args.contrast,
         brightness=args.brightness,
         sharpness=args.sharpness,
+        gamma=args.gamma,
         autocontrast=not args.no_autocontrast,
         dithering=args.dithering,
         edge_enhance=args.edge_enhance,
@@ -227,6 +235,7 @@ def main(argv=None):
                 source,
                 preserve_color=True,
                 font_size=args.font_size,
+                bg=args.bg,
             )
             generator.save_html_to_file(html, args.html)
             print(f"HTML output saved to {args.html}")

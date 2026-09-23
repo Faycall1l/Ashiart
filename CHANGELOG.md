@@ -23,6 +23,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `--max-fps`), video files via optional `ashiart[video]` extra, live
   `--webcam` streaming, self-contained looping HTML export, terminal-fit
   playback sizing, `docs/images/demo.gif` sample
+- Tonal controls: `--gamma` curve exponent and `--resample lanczos|box`
+  downsampling choice; HTML `--bg black|white` page background
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);

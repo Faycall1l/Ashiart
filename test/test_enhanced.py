@@ -238,6 +238,29 @@ class TestEnhancedAsciiArtGenerator(unittest.TestCase):
         self.assertEqual(len(lines), 5)
         self.assertTrue(all(len(line) == 10 for line in lines))
 
+    def test_gamma_and_resample_plumbing(self):
+        """Gamma and resample options must reach the pipeline."""
+        gen = EnhancedAsciiArtGenerator(width=10, height=5, resample="box")
+        gen.set_enhancement(gamma=2.0)
+        self.assertEqual(gen.gamma, 2.0)
+        art = gen.generate_from_image(self.test_image_path)
+        self.assertIsInstance(art, str)
+        with self.assertRaises(ValueError):
+            gen.set_enhancement(gamma=0)
+        with self.assertRaises(ValueError):
+            EnhancedAsciiArtGenerator(resample="nearest")
+
+    def test_html_background_options(self):
+        """HTML must honor black/white backgrounds and reject the rest."""
+        gen = EnhancedAsciiArtGenerator(width=10, height=5)
+        white = gen.generate_html(self.test_image_path, bg="white")
+        self.assertIn("background-color: white", white)
+        self.assertIn("color: black", white)
+        black = gen.generate_html(self.test_image_path)
+        self.assertIn("background-color: black", black)
+        with self.assertRaises(ValueError):
+            gen.generate_html(self.test_image_path, bg="green")
+
 
 if __name__ == "__main__":
     unittest.main() 

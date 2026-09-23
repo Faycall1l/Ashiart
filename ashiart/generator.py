@@ -19,7 +19,10 @@ class AsciiArtGenerator:
     # Monospace glyphs are ~2x taller than wide; sample half as many rows.
     ASPECT_CORRECTION = 0.5
 
-    def __init__(self, chars=None, width=100, height=None, autocontrast=True):
+    RESAMPLE_FILTERS = {"lanczos": Image.LANCZOS, "box": Image.BOX}
+
+    def __init__(self, chars=None, width=100, height=None, autocontrast=True,
+                 resample="lanczos", gamma=1.0):
         """
         Initialize the ASCII art generator.
         
@@ -30,11 +33,21 @@ class AsciiArtGenerator:
             height (int, optional): Height of output ASCII art. Defaults to None.
             autocontrast (bool, optional): Stretch gray levels to use the full
                 ramp (ImageOps.autocontrast). Defaults to True.
+            resample (str, optional): Downsampling filter: "lanczos" (sharp)
+                or "box" (area average). Defaults to "lanczos".
+            gamma (float, optional): Tonal curve exponent applied to gray
+                levels (>1 darkens midtones). Defaults to 1.0.
         """
+        if resample not in self.RESAMPLE_FILTERS:
+            raise ValueError(f"Unknown resample filter: {resample}")
+        if gamma <= 0:
+            raise ValueError(f"Gamma must be positive: {gamma}")
         self.chars = chars or self.ASCII_CHARS
         self.width = width
         self.height = height
         self.autocontrast = autocontrast
+        self.resample = resample
+        self.gamma = gamma
 
     def _resize_image(self, image):
         """
@@ -50,7 +63,7 @@ class AsciiArtGenerator:
         height = self.height or int(image.height * width / image.width * self.ASPECT_CORRECTION)
         # LANCZOS: highest-quality downsampling; NEAREST (the default)
         # aliases high-frequency detail into noise at char resolution.
-        return image.resize((width, height), Image.LANCZOS)
+        return image.resize((width, height), self.RESAMPLE_FILTERS[self.resample])
 
     def _convert_to_grayscale(self, image):
         """
@@ -65,6 +78,9 @@ class AsciiArtGenerator:
         gray = image.convert("L")
         if self.autocontrast:
             gray = ImageOps.autocontrast(gray, cutoff=1)
+        if self.gamma != 1.0:
+            lut = [round(255 * (level / 255) ** self.gamma) for level in range(256)]
+            gray = gray.point(lut)
         return gray
 
     def _map_pixels_to_ascii(self, image):

@@ -91,6 +91,33 @@ class TestAsciiArtGenerator(unittest.TestCase):
         """Levels are stretched to the full ramp unless disabled."""
         self.assertTrue(AsciiArtGenerator(width=10).autocontrast)
 
+    def test_resample_box_matches_dimensions(self):
+        """Area-average resampling must keep output geometry."""
+        art = AsciiArtGenerator(width=10, height=5, resample="box").generate_from_pil_image(
+            self.test_image
+        )
+        lines = art.strip("\n").split("\n")
+        self.assertEqual(len(lines), 5)
+        self.assertTrue(all(len(line) == 10 for line in lines))
+
+    def test_resample_rejects_unknown(self):
+        """Unknown filter names must fail fast."""
+        with self.assertRaises(ValueError):
+            AsciiArtGenerator(resample="nearest")
+
+    def test_gamma_darkens_midtones(self):
+        """Gamma 2.0 must map 128 to ~64 before ramp lookup."""
+        gray = Image.new("L", (4, 4), color=128)
+        converted = AsciiArtGenerator(autocontrast=False, gamma=2.0)._convert_to_grayscale(
+            gray.convert("RGB")
+        )
+        self.assertEqual(converted.getpixel((0, 0)), 64)
+
+    def test_gamma_rejects_non_positive(self):
+        """Gamma must stay positive."""
+        with self.assertRaises(ValueError):
+            AsciiArtGenerator(gamma=0)
+
     def test_generate_from_image(self):
         """Test generating ASCII art from an image file."""
         ascii_art = self.generator.generate_from_image(self.test_image_path)

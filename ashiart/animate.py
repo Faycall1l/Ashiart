@@ -93,7 +93,7 @@ def play_animation(frames, frame_ms=100, loops=0, max_fps=30,
 
 
 def save_animation_html(frames, output_path, frame_ms=100, font_size=10,
-                        font_family="monospace"):
+                        font_family="monospace", bg="black"):
     """Write frames as a self-contained looping HTML animation.
 
     Args:
@@ -102,10 +102,14 @@ def save_animation_html(frames, output_path, frame_ms=100, font_size=10,
         frame_ms (int or list): Per-frame duration(s) in milliseconds.
         font_size (int): Font size in pixels.
         font_family (str): CSS font family.
+        bg (str): Page background, "black" or "white".
 
     Returns:
         str: The output path.
     """
+    if bg not in ("black", "white"):
+        raise ValueError(f"Background must be black or white: {bg}")
+    fg = "white" if bg == "black" else "black"
     if isinstance(frame_ms, (int, float)):
         frame_ms = [frame_ms] * len(frames)
     payload = json.dumps(frames).replace("</", "<\\/")
@@ -120,8 +124,8 @@ def save_animation_html(frames, output_path, frame_ms=100, font_size=10,
     font-size: {font_size}px;
     line-height: 1;
     letter-spacing: 0;
-    background-color: black;
-    color: white;
+    background-color: {bg};
+    color: {fg};
     display: inline-block;
     padding: 10px;
   }}

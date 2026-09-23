@@ -27,18 +27,23 @@ class EnhancedAsciiArtGenerator:
     # Unicode braille patterns (can represent 8 pixels per character)
     BRAILLE_CHARS = [chr(0x2800 + i) for i in range(256)]
 
-    def __init__(self, chars=None, width=100, height=None, mode="standard"):
+    def __init__(self, chars=None, width=100, height=None, mode="standard",
+                 resample="lanczos"):
         """
         Initialize the enhanced ASCII art generator.
         
         Args:
             chars (list, optional): ASCII characters from darkest to lightest. 
-                                   Defaults to None.
+                                    Defaults to None.
             width (int, optional): Width of output ASCII art. Defaults to 100.
             height (int, optional): Height of output ASCII art. Defaults to None.
             mode (str, optional): Rendering mode. Options: "standard", "dense", 
                                  "blocks", "braille". Defaults to "standard".
+            resample (str, optional): Downsampling filter: "lanczos" (sharp)
+                or "box" (area average). Defaults to "lanczos".
         """
+        if resample not in ("lanczos", "box"):
+            raise ValueError(f"Unknown resample filter: {resample}")
         self.mode = mode
         if chars is not None:
             self.chars = chars
@@ -55,11 +60,13 @@ class EnhancedAsciiArtGenerator:
             
         self.width = width
         self.height = height
+        self.resample = resample
         
         # Image enhancement parameters
         self.contrast = 1.0
         self.brightness = 1.0
         self.sharpness = 1.0
+        self.gamma = 1.0
         self.autocontrast = True
         self.dithering = False
         self.edge_enhance = False
@@ -68,8 +75,9 @@ class EnhancedAsciiArtGenerator:
         self.invert = False
 
     def set_enhancement(self, contrast=None, brightness=None, sharpness=None, 
-                        autocontrast=None, dithering=None, edge_enhance=None,
-                        edges=None, edge_threshold=None, invert=None):
+                        gamma=None, autocontrast=None, dithering=None,
+                        edge_enhance=None, edges=None, edge_threshold=None,
+                        invert=None):
         """
         Set image enhancement parameters.
         
@@ -77,6 +85,8 @@ class EnhancedAsciiArtGenerator:
             contrast (float, optional): Contrast adjustment (1.0 is neutral). 
             brightness (float, optional): Brightness adjustment (1.0 is neutral).
             sharpness (float, optional): Sharpness adjustment (1.0 is neutral).
+            gamma (float, optional): Tonal curve exponent (>1 darkens
+                midtones). Defaults to 1.0.
             autocontrast (bool, optional): Stretch gray levels to the full
                 ramp before mapping.
             dithering (bool, optional): Whether to apply dithering.
@@ -93,6 +103,10 @@ class EnhancedAsciiArtGenerator:
             self.brightness = brightness
         if sharpness is not None:
             self.sharpness = sharpness
+        if gamma is not None:
+            if gamma <= 0:
+                raise ValueError(f"Gamma must be positive: {gamma}")
+            self.gamma = gamma
         if autocontrast is not None:
             self.autocontrast = autocontrast
         if dithering is not None:
@@ -105,6 +119,10 @@ class EnhancedAsciiArtGenerator:
             self.edge_threshold = edge_threshold
         if invert is not None:
             self.invert = invert
+
+    def _resample_filter(self):
+        """PIL filter selected by the resample option."""
+        return Image.LANCZOS if self.resample == "lanczos" else Image.BOX
 
     def _resize_image(self, image):
         """
@@ -120,11 +138,11 @@ class EnhancedAsciiArtGenerator:
             # For braille, we want 4x the width and 2x the height for proper mapping
             width = self.width * 2
             height = self.height * 4 if self.height else int(image.height * width / image.width / 1.25)
-            return image.resize((width, height), Image.LANCZOS)
+            return image.resize((width, height), self._resample_filter())
         else:
             width = self.width
             height = self.height or int(image.height * width / image.width * 0.5)
-            return image.resize((width, height), Image.LANCZOS)
+            return image.resize((width, height), self._resample_filter())
 
     def _enhance_image(self, image):
         """
@@ -171,6 +189,9 @@ class EnhancedAsciiArtGenerator:
         gray = image.convert("L")
         if self.autocontrast:
             gray = ImageOps.autocontrast(gray, cutoff=1)
+        if self.gamma != 1.0:
+            lut = [round(255 * (level / 255) ** self.gamma) for level in range(256)]
+            gray = gray.point(lut)
         return gray
 
     def _compute_edge_grid(self, grayscale_image):
@@ -446,7 +467,7 @@ class EnhancedAsciiArtGenerator:
         return "\n".join(lines)
 
     def generate_html(self, image_path, font_size=10, font_family="monospace", 
-                     preserve_color=False):
+                      preserve_color=False, bg="black"):
         """
         Generate HTML representation of the ASCII art with optional color.
         
@@ -456,10 +477,15 @@ class EnhancedAsciiArtGenerator:
             font_family (str, optional): Font family. Defaults to "monospace".
             preserve_color (bool, optional): Whether to preserve the original colors.
                                            Defaults to False.
+            bg (str, optional): Page background, "black" or "white".
+                Defaults to "black".
         
         Returns:
             str: HTML string representing the ASCII art.
         """
+        if bg not in ("black", "white"):
+            raise ValueError(f"Background must be black or white: {bg}")
+        fg = "white" if bg == "black" else "black"
         image = open_image(image_path)
         original_image = image.copy()
         
@@ -488,8 +514,8 @@ class EnhancedAsciiArtGenerator:
     font-size: {font_size}px;
     line-height: 1;
     letter-spacing: 0;
-    background-color: black;
-    color: white;
+    background-color: {bg};
+    color: {fg};
     display: inline-block;
     padding: 10px;
   }}
@@ -554,7 +580,8 @@ class EnhancedAsciiArtGenerator:
 
 # Convenience functions
 def image_to_ascii(image_path, width=100, height=None, mode="standard",
-                   chars=None, contrast=1.0, brightness=1.0, sharpness=1.0,
+                   chars=None, resample="lanczos", contrast=1.0, brightness=1.0,
+                   sharpness=1.0, gamma=1.0,
                    autocontrast=True, dithering=False, edge_enhance=False,
                    edges=False, edge_threshold=0.35,
                    invert=False, ansi=False):
@@ -562,15 +589,17 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
     Convert an image to ASCII art (single entry point).
     
     Args:
-        image_path (str): Path to the image file.
+        image_path (str): Local path, bytes, or http(s) URL.
         width (int, optional): Width of output ASCII art. Defaults to 100.
         height (int, optional): Height of output ASCII art. Defaults to None.
         mode (str, optional): Rendering mode. Options: "standard", "dense", 
                              "blocks", "braille". Defaults to "standard".
         chars (list, optional): Custom characters, darkest to lightest.
+        resample (str, optional): "lanczos" or "box" downsampling.
         contrast (float, optional): Contrast adjustment (1.0 is neutral).
         brightness (float, optional): Brightness adjustment (1.0 is neutral).
         sharpness (float, optional): Sharpness adjustment (1.0 is neutral).
+        gamma (float, optional): Tonal curve exponent (>1 darkens midtones).
         autocontrast (bool, optional): Stretch gray levels to the full ramp.
         dithering (bool, optional): Whether to apply dithering.
         edge_enhance (bool, optional): Whether to enhance edges.
@@ -583,9 +612,11 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
         str: ASCII art as a string.
     """
     generator = EnhancedAsciiArtGenerator(chars=chars, width=width,
-                                        height=height, mode=mode)
+                                        height=height, mode=mode,
+                                        resample=resample)
     generator.set_enhancement(contrast=contrast, brightness=brightness, 
-                            sharpness=sharpness, autocontrast=autocontrast,
+                            sharpness=sharpness, gamma=gamma,
+                            autocontrast=autocontrast,
                             dithering=dithering, 
                             edge_enhance=edge_enhance, edges=edges,
                             edge_threshold=edge_threshold, invert=invert)
@@ -594,7 +625,7 @@ def image_to_ascii(image_path, width=100, height=None, mode="standard",
 
 def image_to_html_ascii(image_path, width=100, height=None, mode="dense", 
                       preserve_color=True, font_size=8, font_family="monospace",
-                      contrast=1.2, brightness=1.0, dithering=False, 
+                      bg="black", contrast=1.2, brightness=1.0, dithering=False, 
                       edge_enhance=True, invert=False):
     """
     Convenience function to convert an image to HTML ASCII art with color.
@@ -608,6 +639,7 @@ def image_to_html_ascii(image_path, width=100, height=None, mode="dense",
         preserve_color (bool, optional): Whether to preserve original colors.
         font_size (int, optional): Font size in pixels. Defaults to 8.
         font_family (str, optional): Font family. Defaults to "monospace".
+        bg (str, optional): Page background, "black" or "white".
         contrast (float, optional): Contrast adjustment (1.0 is neutral).
         brightness (float, optional): Brightness adjustment (1.0 is neutral).
         dithering (bool, optional): Whether to apply dithering.
@@ -622,5 +654,5 @@ def image_to_html_ascii(image_path, width=100, height=None, mode="dense",
                             dithering=dithering, edge_enhance=edge_enhance, 
                             invert=invert)
     return generator.generate_html(image_path, font_size=font_size, 
-                                  font_family=font_family, 
-                                  preserve_color=preserve_color) 
+                                   font_family=font_family, 
+                                   preserve_color=preserve_color, bg=bg)
