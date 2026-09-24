@@ -3,6 +3,10 @@
 Install with the extra: pip install ashiart[video]
 """
 
+from __future__ import annotations
+
+from collections.abc import Iterator
+
 from PIL import Image, ImageOps
 
 
@@ -17,7 +21,9 @@ def _require_cv2():
     return cv2
 
 
-def iter_video_frames(path, max_frames=None):
+def iter_video_frames(
+    path: str, max_frames: int | None = None
+) -> Iterator[tuple[Image.Image, int]]:
     """Yield (RGB frame, duration_ms) pairs from a video file.
 
     Args:
@@ -43,7 +49,7 @@ def iter_video_frames(path, max_frames=None):
         capture.release()
 
 
-def iter_webcam_frames(index=0, mirror=True):
+def iter_webcam_frames(index: int = 0, mirror: bool = True) -> Iterator[Image.Image]:
     """Yield RGB frames from a webcam until the generator is closed.
 
     Args:

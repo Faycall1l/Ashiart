@@ -4,6 +4,10 @@ Exports AsciiArtGenerator, the NumPy-free converter used directly and
 as the fallback when enhanced dependencies are unavailable.
 """
 
+from __future__ import annotations
+
+from typing import ClassVar
+
 from PIL import Image, ImageOps
 
 from .io import open_image, prepare_image
@@ -14,20 +18,43 @@ class AsciiArtGenerator:
 
     # ASCII characters from darkest to lightest (trailing space = paper white,
     # per the canonical density ramps: Bourke, "@%#*+=-:. ", etc.)
-    ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", ".", " "]
+    ASCII_CHARS: ClassVar[list] = [
+        "@",
+        "#",
+        "S",
+        "%",
+        "?",
+        "*",
+        "+",
+        ";",
+        ":",
+        ",",
+        ".",
+        " ",
+    ]
 
     # Monospace glyphs are ~2x taller than wide; sample half as many rows.
-    ASPECT_CORRECTION = 0.5
+    ASPECT_CORRECTION: ClassVar[float] = 0.5
 
-    RESAMPLE_FILTERS = {"lanczos": Image.LANCZOS, "box": Image.BOX}
+    RESAMPLE_FILTERS: ClassVar[dict] = {
+        "lanczos": Image.Resampling.LANCZOS,
+        "box": Image.Resampling.BOX,
+    }
 
-    def __init__(self, chars=None, width=100, height=None, autocontrast=True,
-                 resample="lanczos", gamma=1.0):
+    def __init__(
+        self,
+        chars: list[str] | None = None,
+        width: int = 100,
+        height: int | None = None,
+        autocontrast: bool = True,
+        resample: str = "lanczos",
+        gamma: float = 1.0,
+    ):
         """
         Initialize the ASCII art generator.
-        
+
         Args:
-            chars (list, optional): ASCII characters from darkest to lightest. 
+            chars (list, optional): ASCII characters from darkest to lightest.
                                     Defaults to None.
             width (int, optional): Width of output ASCII art. Defaults to 100.
             height (int, optional): Height of output ASCII art. Defaults to None.
@@ -52,15 +79,17 @@ class AsciiArtGenerator:
     def _resize_image(self, image):
         """
         Resize image to the specified width and height.
-        
+
         Args:
             image (PIL.Image): The image to resize.
-            
+
         Returns:
             PIL.Image: The resized image.
         """
         width = self.width
-        height = self.height or int(image.height * width / image.width * self.ASPECT_CORRECTION)
+        height = self.height or int(
+            image.height * width / image.width * self.ASPECT_CORRECTION
+        )
         # LANCZOS: highest-quality downsampling; NEAREST (the default)
         # aliases high-frequency detail into noise at char resolution.
         return image.resize((width, height), self.RESAMPLE_FILTERS[self.resample])
@@ -68,10 +97,10 @@ class AsciiArtGenerator:
     def _convert_to_grayscale(self, image):
         """
         Convert image to grayscale, stretching levels to the full ramp.
-        
+
         Args:
             image (PIL.Image): The image to convert.
-            
+
         Returns:
             PIL.Image: The grayscale image.
         """
@@ -86,63 +115,63 @@ class AsciiArtGenerator:
     def _map_pixels_to_ascii(self, image):
         """
         Map each pixel to an ASCII character.
-        
+
         Args:
             image (PIL.Image): The grayscale image.
-            
+
         Returns:
             list: 2D list of ASCII characters.
         """
         pixels = list(image.getdata())
         width = image.width
         ascii_image = []
-        
+
         for i in range(0, len(pixels), width):
-            row = pixels[i:i + width]
+            row = pixels[i : i + width]
             ascii_row = []
-            
+
             for pixel in row:
                 # Round so buckets stay symmetric; clamp for short custom ramps.
                 index = round(pixel * (len(self.chars) - 1) / 255)
                 index = max(0, min(index, len(self.chars) - 1))
                 ascii_row.append(self.chars[index])
-            
+
             ascii_image.append(ascii_row)
-        
+
         return ascii_image
 
-    def generate_from_image(self, image_path, color=False):
+    def generate_from_image(self, image_path: str | bytes, color: bool = False) -> str:
         """
         Generate ASCII art from an image file.
-        
+
         Args:
             image_path (str): Local path or http(s) URL.
             color (bool, optional): Wrap characters in ANSI truecolor codes
                 sampled after resizing. Defaults to False.
-            
+
         Returns:
             str: ASCII art as a string.
         """
         image = open_image(image_path)
-        
+
         if color:
             return self.generate_ansi_from_pil_image(image)
 
         image = self._resize_image(image)
         grayscale_image = self._convert_to_grayscale(image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
-        
+
         return "\n".join("".join(row) for row in ascii_image)
 
-    def generate_from_pil_image(self, image, color=False):
+    def generate_from_pil_image(self, image: Image.Image, color: bool = False) -> str:
         """
         Generate ASCII art from a PIL Image object.
-        
+
         Args:
             image (PIL.Image): PIL Image object.
             color (bool, optional): Wrap characters in ANSI truecolor codes.
                 Defaults to False.
-            
+
         Returns:
             str: ASCII art as a string.
         """
@@ -151,10 +180,10 @@ class AsciiArtGenerator:
         image = self._resize_image(prepare_image(image))
         grayscale_image = self._convert_to_grayscale(image)
         ascii_image = self._map_pixels_to_ascii(grayscale_image)
-        
+
         return "\n".join("".join(row) for row in ascii_image)
 
-    def generate_ansi_from_pil_image(self, image):
+    def generate_ansi_from_pil_image(self, image: Image.Image) -> str:
         """
         Generate ANSI-colored ASCII art from a PIL Image object.
 
@@ -183,10 +212,10 @@ class AsciiArtGenerator:
             lines.append("".join(parts))
         return "\n".join(lines)
 
-    def save_to_file(self, ascii_art, output_path):
+    def save_to_file(self, ascii_art: str, output_path: str) -> None:
         """
         Save ASCII art to a file.
-        
+
         Args:
             ascii_art (str): The ASCII art to save.
             output_path (str): Path to save the ASCII art.

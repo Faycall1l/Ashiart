@@ -29,6 +29,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `examples/benchmark.py` throughput harness
 - `ashiart/tonal.py`: NumPy CLAHE (`--clahe`) and Difference-of-Gaussians
   (`--dog SMALL LARGE AMPLIFY`) detail operators, dependency-free
+- Quality gates: ruff check/format, mypy on `ashiart/`, pytest coverage
+  floor at 80%, README python snippets executed as tests; dev tooling
+  pinned in `requirements-dev.txt`; weekly Dependabot updates
 - README gallery with byte-verified per-mode outputs; download and
   last-commit badges
 

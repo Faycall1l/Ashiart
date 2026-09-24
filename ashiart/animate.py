@@ -1,9 +1,14 @@
 """Terminal animation: render frame sequences as looping ASCII playback."""
 
+from __future__ import annotations
+
 import json
 import shutil
 import sys
 import time
+from typing import IO, Callable
+
+from PIL import Image
 
 from .io import open_raw
 
@@ -11,7 +16,7 @@ CLEAR_SCREEN = "\x1b[2J"
 CURSOR_HOME = "\x1b[H"
 
 
-def iter_gif_frames(source):
+def iter_gif_frames(source: str | bytes) -> list[tuple[Image.Image, int]]:
     """Split an animated image into (RGB frame, duration_ms) pairs.
 
     Args:
@@ -32,7 +37,9 @@ def iter_gif_frames(source):
     return frames
 
 
-def fit_to_terminal(width=None, height=None, aspect=0.5):
+def fit_to_terminal(
+    width: int | None = None, height: int | None = None, aspect: float = 0.5
+) -> tuple[int, int | None]:
     """Resolve playback dimensions against the terminal size.
 
     Args:
@@ -53,8 +60,14 @@ def fit_to_terminal(width=None, height=None, aspect=0.5):
     return max(width, 1), max(min(height, rows - 4), 1)
 
 
-def play_animation(frames, frame_ms=100, loops=0, max_fps=30,
-                   output=None, sleeper=None):
+def play_animation(
+    frames: list[str],
+    frame_ms: int | float | list[int] = 100,
+    loops: int = 0,
+    max_fps: float = 30,
+    output: IO[str] | None = None,
+    sleeper: Callable[[float], None] | None = None,
+) -> int:
     """Print ASCII frames as a looping terminal animation.
 
     Args:
@@ -70,14 +83,17 @@ def play_animation(frames, frame_ms=100, loops=0, max_fps=30,
     """
     output = output if output is not None else sys.stdout
     sleeper = sleeper if sleeper is not None else time.sleep
-    if isinstance(frame_ms, (int, float)):
-        frame_ms = [frame_ms] * len(frames)
+    durations: list = (
+        [frame_ms] * len(frames)
+        if isinstance(frame_ms, (int, float))
+        else list(frame_ms)
+    )
     min_interval = 1.0 / max_fps if max_fps else 0.0
     completed = 0
     output.write(CLEAR_SCREEN)
     try:
         while loops == 0 or completed < loops:
-            for text, duration in zip(frames, frame_ms):
+            for text, duration in zip(frames, durations):
                 started = time.monotonic()
                 output.write(CURSOR_HOME + text)
                 output.flush()
@@ -92,8 +108,14 @@ def play_animation(frames, frame_ms=100, loops=0, max_fps=30,
     return completed
 
 
-def save_animation_html(frames, output_path, frame_ms=100, font_size=10,
-                        font_family="monospace", bg="black"):
+def save_animation_html(
+    frames: list[str],
+    output_path: str,
+    frame_ms: int | float | list[int] = 100,
+    font_size: int = 10,
+    font_family: str = "monospace",
+    bg: str = "black",
+) -> str:
     """Write frames as a self-contained looping HTML animation.
 
     Args:
@@ -110,10 +132,13 @@ def save_animation_html(frames, output_path, frame_ms=100, font_size=10,
     if bg not in ("black", "white"):
         raise ValueError(f"Background must be black or white: {bg}")
     fg = "white" if bg == "black" else "black"
-    if isinstance(frame_ms, (int, float)):
-        frame_ms = [frame_ms] * len(frames)
+    durations: list = (
+        [frame_ms] * len(frames)
+        if isinstance(frame_ms, (int, float))
+        else list(frame_ms)
+    )
     payload = json.dumps(frames).replace("</", "<\\/")
-    timings = json.dumps(frame_ms)
+    timings = json.dumps(durations)
     html = f"""<!DOCTYPE html>
 <html>
 <head>

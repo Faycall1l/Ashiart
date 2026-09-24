@@ -23,9 +23,15 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install pytest
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f requirements-dev.txt ]; then pip install -r requirements-dev.txt; fi
         pip install -e .
+    - name: Lint with ruff
+      run: |
+        ruff check ashiart/ test/ examples/
+        ruff format --check ashiart/ test/ examples/
+    - name: Type-check with mypy
+      run: |
+        mypy ashiart/
     - name: Test with pytest
       run: |
-        pytest 
+        pytest --cov=ashiart --cov-report=term-missing --cov-fail-under=80 

@@ -9,7 +9,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")
 
 from ashiart import EnhancedAsciiArtGenerator
 
-IMAGE = os.path.join(os.path.dirname(__file__), "..", "docs", "images", "puppy-head.jpg")
+IMAGE = os.path.join(
+    os.path.dirname(__file__), "..", "docs", "images", "puppy-head.jpg"
+)
 WIDTHS = (60, 100, 200)
 MODES = ("standard", "dense", "blocks")
 REPEATS = 5
@@ -19,9 +21,7 @@ def bench(mode, width):
     generator = EnhancedAsciiArtGenerator(width=width, mode=mode)
     art = generator.generate_from_image(IMAGE)  # warm up caches
     cells = sum(len(line) for line in art.split("\n"))
-    best = min(
-        _timed(generator, mode) for _ in range(REPEATS)
-    )
+    best = min(_timed(generator, mode) for _ in range(REPEATS))
     print(f"{mode:>8} w={width:<4} {cells / best:>12,.0f} chars/s")
 
 

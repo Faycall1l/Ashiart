@@ -1,13 +1,13 @@
 """Tests for the ASCII art generator module."""
 
 import os
-import unittest
-from unittest.mock import patch, MagicMock
-from PIL import Image, ImageDraw
 import tempfile
+import unittest
 
-from ashiart.generator import AsciiArtGenerator
+from PIL import Image, ImageDraw
+
 from ashiart import image_to_ascii
+from ashiart.generator import AsciiArtGenerator
 
 
 class TestAsciiArtGenerator(unittest.TestCase):
@@ -16,17 +16,17 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures."""
         self.generator = AsciiArtGenerator(width=10, height=5)
-        
+
         # Create a test image
         self.test_image = Image.new("RGB", (100, 50), color="white")
         draw = ImageDraw.Draw(self.test_image)
         draw.rectangle([(0, 0), (50, 25)], fill="black")
-        
+
         # Create temp file
         self.temp_dir = tempfile.TemporaryDirectory()
         self.test_image_path = os.path.join(self.temp_dir.name, "test_image.png")
         self.test_image.save(self.test_image_path)
-        
+
         # Output path for saving tests
         self.output_path = os.path.join(self.temp_dir.name, "output.txt")
 
@@ -38,12 +38,12 @@ class TestAsciiArtGenerator(unittest.TestCase):
         """Test initialization with default and custom values."""
         # Default ASCII characters
         self.assertEqual(self.generator.chars, AsciiArtGenerator.ASCII_CHARS)
-        
+
         # Custom ASCII characters
         custom_chars = ["X", "O", "."]
         custom_generator = AsciiArtGenerator(chars=custom_chars)
         self.assertEqual(custom_generator.chars, custom_chars)
-        
+
         # Custom dimensions
         self.assertEqual(self.generator.width, 10)
         self.assertEqual(self.generator.height, 5)
@@ -64,12 +64,12 @@ class TestAsciiArtGenerator(unittest.TestCase):
         # Create a small test image with a gradient
         test_img = Image.new("L", (2, 2))
         test_img.putdata([0, 128, 255, 32])  # Black, gray, white, dark gray
-        
+
         # Use only 3 ASCII characters for simpler testing
         self.generator.chars = ["@", "O", "."]
-        
+
         ascii_image = self.generator._map_pixels_to_ascii(test_img)
-        
+
         # Buckets are symmetric via round(): 0 -> first, 128 -> middle,
         # 255 -> last, 32 (12% gray) -> first char
         self.assertEqual(ascii_image[0][0], "@")  # Darkest (0) -> first char
@@ -93,9 +93,9 @@ class TestAsciiArtGenerator(unittest.TestCase):
 
     def test_resample_box_matches_dimensions(self):
         """Area-average resampling must keep output geometry."""
-        art = AsciiArtGenerator(width=10, height=5, resample="box").generate_from_pil_image(
-            self.test_image
-        )
+        art = AsciiArtGenerator(
+            width=10, height=5, resample="box"
+        ).generate_from_pil_image(self.test_image)
         lines = art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)
         self.assertTrue(all(len(line) == 10 for line in lines))
@@ -108,9 +108,9 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def test_gamma_darkens_midtones(self):
         """Gamma 2.0 must map 128 to ~64 before ramp lookup."""
         gray = Image.new("L", (4, 4), color=128)
-        converted = AsciiArtGenerator(autocontrast=False, gamma=2.0)._convert_to_grayscale(
-            gray.convert("RGB")
-        )
+        converted = AsciiArtGenerator(
+            autocontrast=False, gamma=2.0
+        )._convert_to_grayscale(gray.convert("RGB"))
         self.assertEqual(converted.getpixel((0, 0)), 64)
 
     def test_gamma_rejects_non_positive(self):
@@ -121,7 +121,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def test_generate_from_image(self):
         """Test generating ASCII art from an image file."""
         ascii_art = self.generator.generate_from_image(self.test_image_path)
-        
+
         # Check that we get a string with the expected dimensions
         lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
@@ -130,7 +130,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def test_generate_from_pil_image(self):
         """Test generating ASCII art from a PIL Image object."""
         ascii_art = self.generator.generate_from_pil_image(self.test_image)
-        
+
         # Check that we get a string with the expected dimensions
         lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
@@ -140,11 +140,11 @@ class TestAsciiArtGenerator(unittest.TestCase):
         """Test saving ASCII art to a file."""
         ascii_art = "TEST\nASCII\nART"
         self.generator.save_to_file(ascii_art, self.output_path)
-        
+
         # Check that the file was created with the correct content
         with open(self.output_path, "r") as f:
             content = f.read()
-        
+
         self.assertEqual(content, ascii_art)
 
     def test_file_not_found(self):
@@ -207,13 +207,16 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def test_flatten_alpha_passes_opaque_through(self):
         """Images without alpha come back untouched."""
         from ashiart.io import flatten_alpha
+
         rgb = Image.new("RGB", (4, 4), color="red")
         self.assertIs(flatten_alpha(rgb), rgb)
 
     def test_open_image_accepts_raw_bytes(self):
         """Piped stdin bytes must decode like files."""
         import io as stdlib_io
+
         from ashiart.io import open_image
+
         buffer = stdlib_io.BytesIO()
         self.test_image.save(buffer, format="PNG")
         image = open_image(buffer.getvalue())
@@ -230,6 +233,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
         img.save(path, exif=exif, quality=95)
 
         from ashiart.io import open_image
+
         self.assertEqual(open_image(path).size, (4, 8))
 
         gen = AsciiArtGenerator(width=4, autocontrast=False)
@@ -241,7 +245,7 @@ class TestAsciiArtGenerator(unittest.TestCase):
     def test_image_to_ascii_function(self):
         """Test the convenience function."""
         ascii_art = image_to_ascii(self.test_image_path, width=10, height=5)
-        
+
         # Check that we get a string with the expected dimensions
         lines = ascii_art.strip("\n").split("\n")
         self.assertEqual(len(lines), 5)  # 5 rows
@@ -249,4 +253,4 @@ class TestAsciiArtGenerator(unittest.TestCase):
 
 
 if __name__ == "__main__":
-    unittest.main() 
+    unittest.main()

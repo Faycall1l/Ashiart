@@ -1,1 +1,1 @@
-"""Tests for the AshiArt package.""" 
+"""Tests for the AshiArt package."""

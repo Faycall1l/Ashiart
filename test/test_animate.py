@@ -21,8 +21,7 @@ from ashiart.animate import (
 def _two_frame_gif(path):
     black = Image.new("RGB", (8, 8), color="black")
     white = Image.new("RGB", (8, 8), color="white")
-    black.save(path, save_all=True, append_images=[white],
-               duration=[100, 200], loop=0)
+    black.save(path, save_all=True, append_images=[white], duration=[100, 200], loop=0)
 
 
 class TestGifFrames(unittest.TestCase):
@@ -49,8 +48,9 @@ class TestPlayback(unittest.TestCase):
     def test_loops_once_and_clears(self):
         sleeps = []
         buffer = stdlib_io.StringIO()
-        completed = play_animation(["AA", "BB"], [100, 100], loops=1,
-                                   output=buffer, sleeper=sleeps.append)
+        completed = play_animation(
+            ["AA", "BB"], [100, 100], loops=1, output=buffer, sleeper=sleeps.append
+        )
         self.assertEqual(completed, 1)
         out = buffer.getvalue()
         self.assertIn("\x1b[2J", out)
@@ -61,15 +61,17 @@ class TestPlayback(unittest.TestCase):
     def test_max_fps_caps_rate(self):
         sleeps = []
         buffer = stdlib_io.StringIO()
-        play_animation(["AA"], 5, loops=1, max_fps=10,
-                       output=buffer, sleeper=sleeps.append)
+        play_animation(
+            ["AA"], 5, loops=1, max_fps=10, output=buffer, sleeper=sleeps.append
+        )
         self.assertTrue(all(s >= 0.09 for s in sleeps))
 
     def test_fit_to_terminal(self):
         import shutil as shutil_module
 
-        with patch.object(shutil_module, "get_terminal_size",
-                          return_value=os.terminal_size((60, 20))):
+        with patch.object(
+            shutil_module, "get_terminal_size", return_value=os.terminal_size((60, 20))
+        ):
             width, height = fit_to_terminal()
         self.assertEqual(width, 58)
         self.assertIsNone(height)
@@ -157,9 +159,10 @@ class TestVideo(unittest.TestCase):
     def test_missing_cv2_explains_extra(self):
         from ashiart.video import _require_cv2
 
-        with patch.dict(sys.modules, {"cv2": None}):
-            with self.assertRaises(ValueError) as context:
-                _require_cv2()
+        with patch.dict(sys.modules, {"cv2": None}), self.assertRaises(
+            ValueError
+        ) as context:
+            _require_cv2()
         self.assertIn("ashiart[video]", str(context.exception))
 
 

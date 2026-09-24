@@ -27,8 +27,9 @@ class TestClahe(unittest.TestCase):
         narrow = _gray([(x % 41) + 100 for x in range(32 * 32)], (32, 32))
         out = np.asarray(apply_clahe(narrow))
         before = np.asarray(narrow)
-        self.assertGreater(int(out.max()) - int(out.min()),
-                           int(before.max()) - int(before.min()))
+        self.assertGreater(
+            int(out.max()) - int(out.min()), int(before.max()) - int(before.min())
+        )
 
     def test_output_geometry_and_range(self):
         """Shape preserved, values stay in byte range."""
