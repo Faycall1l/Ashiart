@@ -425,19 +425,22 @@ class EnhancedAsciiArtGenerator:
         else:
             return self._map_pixels_to_ascii_standard(image)
 
-    def generate_from_image(self, image_path: str | bytes, ansi: bool = False) -> str:
+    def generate_from_image(
+        self, image_path: str | bytes, ansi: bool = False, cache: bool = True
+    ) -> str:
         """
         Generate ASCII art from an image file.
 
         Args:
-            image_path (str): Local path or http(s) URL.
+            image_path (str): Local path, bytes, or http(s) URL.
             ansi (bool, optional): Wrap characters in ANSI truecolor codes.
                 Defaults to False.
+            cache (bool, optional): Reuse cached URL downloads.
 
         Returns:
             str: ASCII art as a string.
         """
-        image = open_image(image_path)
+        image = open_image(image_path, cache=cache)
 
         if ansi:
             return self.generate_ansi_from_pil_image(image)
@@ -533,6 +536,7 @@ class EnhancedAsciiArtGenerator:
         font_family: str = "monospace",
         preserve_color: bool = False,
         bg: str = "black",
+        cache: bool = True,
     ) -> str:
         """
         Generate HTML representation of the ASCII art with optional color.
@@ -545,6 +549,7 @@ class EnhancedAsciiArtGenerator:
                                            Defaults to False.
             bg (str, optional): Page background, "black" or "white".
                 Defaults to "black".
+            cache (bool, optional): Reuse cached URL downloads.
 
         Returns:
             str: HTML string representing the ASCII art.
@@ -552,7 +557,7 @@ class EnhancedAsciiArtGenerator:
         if bg not in ("black", "white"):
             raise ValueError(f"Background must be black or white: {bg}")
         fg = "white" if bg == "black" else "black"
-        image = open_image(image_path)
+        image = open_image(image_path, cache=cache)
         original_image = image.copy()
 
         image = self._resize_image(image)
@@ -665,6 +670,7 @@ def image_to_ascii(
     dog: tuple[float, float, float] | None = None,
     invert: bool = False,
     ansi: bool = False,
+    cache: bool = True,
 ) -> str:
     """
     Convert an image to ASCII art (single entry point).
@@ -690,6 +696,7 @@ def image_to_ascii(
         dog (tuple, optional): (small, large, amplify) DoG sigmas.
         invert (bool, optional): Whether to invert the image.
         ansi (bool, optional): Wrap output in ANSI truecolor codes.
+        cache (bool, optional): Reuse cached URL downloads.
 
     Returns:
         str: ASCII art as a string.
@@ -711,7 +718,7 @@ def image_to_ascii(
         dog=dog,
         invert=invert,
     )
-    return generator.generate_from_image(image_path, ansi=ansi)
+    return generator.generate_from_image(image_path, ansi=ansi, cache=cache)
 
 
 def image_to_html_ascii(
@@ -728,6 +735,7 @@ def image_to_html_ascii(
     dithering: bool = False,
     edge_enhance: bool = True,
     invert: bool = False,
+    cache: bool = True,
 ) -> str:
     """
     Convenience function to convert an image to HTML ASCII art with color.
@@ -765,4 +773,5 @@ def image_to_html_ascii(
         font_family=font_family,
         preserve_color=preserve_color,
         bg=bg,
+        cache=cache,
     )

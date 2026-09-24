@@ -2,14 +2,79 @@
 
 from __future__ import annotations
 
+import hashlib
 import io
 import os
+import urllib.error
+import urllib.parse
 import urllib.request
 
 from PIL import Image, ImageDraw, ImageOps
 
 _USER_AGENT = "ashiart"
 _FLAT_BACKGROUND = (255, 255, 255)
+
+
+def _cache_dir() -> str:
+    """Per-user download cache directory (unbounded, hashed filenames)."""
+    if os.name == "nt":
+        base = os.environ.get("LOCALAPPDATA") or os.path.expanduser("~")
+    else:
+        base = os.environ.get("XDG_CACHE_HOME") or os.path.join(
+            os.path.expanduser("~"), ".cache"
+        )
+    return os.path.join(base, "ashiart")
+
+
+def download_image(url: str, timeout: float = 15, cache: bool = True) -> bytes:
+    """Fetch URL bytes with a disk cache and one transient-error retry.
+
+    Args:
+        url (str): http(s) URL.
+        timeout (float): Per-attempt timeout in seconds.
+        cache (bool): Reuse previously downloaded bytes.
+
+    Raises:
+        ValueError: Unreachable host, HTTP error, or exhausted retries.
+
+    Returns:
+        bytes: Response body.
+    """
+    suffix = os.path.splitext(urllib.parse.urlparse(url).path)[1][:8] or ".img"
+    cached = os.path.join(
+        _cache_dir(), hashlib.sha256(url.encode()).hexdigest() + suffix
+    )
+    if cache:
+        try:
+            with open(cached, "rb") as file:
+                return file.read()
+        except OSError:
+            pass
+    last_error: Exception | None = None
+    for _ in range(2):
+        try:
+            request = urllib.request.Request(url, headers={"User-Agent": _USER_AGENT})
+            with urllib.request.urlopen(request, timeout=timeout) as response:
+                data = response.read()
+            break
+        except urllib.error.HTTPError as error:
+            if 400 <= error.code < 500:
+                raise ValueError(
+                    f"Download failed with HTTP {error.code}: {url}"
+                ) from error
+            last_error = error
+        except Exception as error:
+            last_error = error
+    else:
+        raise ValueError(f"Could not download image: {last_error}")
+    if cache:
+        try:
+            os.makedirs(_cache_dir(), exist_ok=True)
+            with open(cached, "wb") as file:
+                file.write(data)
+        except OSError:
+            pass
+    return data
 
 
 def flatten_alpha(
@@ -95,7 +160,9 @@ def demo_image(size: tuple[int, int] = (240, 120)) -> Image.Image:
     return image
 
 
-def open_raw(source: str | bytes | bytearray, timeout: float = 15) -> Image.Image:
+def open_raw(
+    source: str | bytes | bytearray, timeout: float = 15, cache: bool = True
+) -> Image.Image:
     """Decode an image without orientation or flattening.
 
     Unlike open_image, the result stays seekable, so GIF frames can be
@@ -104,6 +171,7 @@ def open_raw(source: str | bytes | bytearray, timeout: float = 15) -> Image.Imag
     Args:
         source (str or bytes): Filesystem path, raw image bytes, or URL.
         timeout (float): Download timeout in seconds; URLs only.
+        cache (bool): Reuse cached URL downloads.
 
     Raises:
         FileNotFoundError: Local path does not exist.
@@ -120,14 +188,8 @@ def open_raw(source: str | bytes | bytearray, timeout: float = 15) -> Image.Imag
             raise ValueError(f"Bytes are not an image: {error}") from error
         return image
     if isinstance(source, str) and source.startswith(("http://", "https://")):
-        request = urllib.request.Request(source, headers={"User-Agent": _USER_AGENT})
         try:
-            with urllib.request.urlopen(request, timeout=timeout) as response:
-                data = response.read()
-        except Exception as error:
-            raise ValueError(f"Could not download image: {error}") from error
-        try:
-            return Image.open(io.BytesIO(data))
+            return Image.open(io.BytesIO(download_image(source, timeout, cache)))
         except Exception as error:
             raise ValueError(f"Downloaded bytes are not an image: {error}") from error
     if not os.path.exists(source):
@@ -138,13 +200,16 @@ def open_raw(source: str | bytes | bytearray, timeout: float = 15) -> Image.Imag
         raise ValueError(f"Error opening image: {error}") from error
 
 
-def open_image(source: str | bytes | bytearray, timeout: float = 15) -> Image.Image:
+def open_image(
+    source: str | bytes | bytearray, timeout: float = 15, cache: bool = True
+) -> Image.Image:
     """Open a PIL image from a local path, bytes, or an http(s) URL.
 
     Args:
         source (str or bytes): Filesystem path, raw image bytes
             (e.g. piped stdin), or http(s) URL.
         timeout (float): Download timeout in seconds; URLs only.
+        cache (bool): Reuse cached URL downloads.
 
     Raises:
         FileNotFoundError: Local path does not exist.
@@ -154,7 +219,7 @@ def open_image(source: str | bytes | bytearray, timeout: float = 15) -> Image.Im
         PIL.Image: Oriented, opaque RGB-ready image.
     """
     try:
-        return prepare_image(open_raw(source, timeout))
+        return prepare_image(open_raw(source, timeout, cache))
     except (FileNotFoundError, ValueError):
         raise
     except Exception as error:

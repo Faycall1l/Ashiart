@@ -3,6 +3,7 @@
 import os
 import tempfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 from PIL import Image, ImageDraw
 
@@ -180,6 +181,102 @@ class TestAsciiArtGenerator(unittest.TestCase):
         """Unreachable hosts and non-image bytes raise ValueError."""
         with self.assertRaises(ValueError):
             self.generator.generate_from_image("http://127.0.0.1:1/nope.png")
+
+    def _http_server(self, counter):
+        import functools
+        import http.server
+        import threading
+
+        class Handler(http.server.SimpleHTTPRequestHandler):
+            def do_GET(self):
+                counter["n"] += 1
+                return super().do_GET()
+
+            def log_message(self, *args):
+                pass
+
+        factory = functools.partial(Handler, directory=self.temp_dir.name)
+        server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), factory)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        return server, thread
+
+    def test_url_cached_across_fetches(self):
+        """Second fetch must not hit the network; cache survives shutdown."""
+        import tempfile
+
+        counter = {"n": 0}
+        server, thread = self._http_server(counter)
+        url = f"http://127.0.0.1:{server.server_address[1]}/test_image.png"
+        with tempfile.TemporaryDirectory() as cache_home, patch.dict(
+            os.environ, {"XDG_CACHE_HOME": cache_home}
+        ):
+            first = self.generator.generate_from_image(url)
+            second = self.generator.generate_from_image(url)
+            server.shutdown()
+            thread.join()
+            offline = self.generator.generate_from_image(url)
+        self.assertEqual(counter["n"], 1)
+        self.assertEqual(first, second)
+        self.assertEqual(first, offline)
+
+    def test_no_cache_refetches_every_time(self):
+        """cache=False must hit the network on every fetch."""
+        import tempfile
+
+        counter = {"n": 0}
+        server, thread = self._http_server(counter)
+        try:
+            url = f"http://127.0.0.1:{server.server_address[1]}/test_image.png"
+            with tempfile.TemporaryDirectory() as cache_home, patch.dict(
+                os.environ, {"XDG_CACHE_HOME": cache_home}
+            ):
+                self.generator.generate_from_image(url, cache=False)
+                self.generator.generate_from_image(url, cache=False)
+        finally:
+            server.shutdown()
+            thread.join()
+        self.assertEqual(counter["n"], 2)
+
+    def test_transient_error_retries_once(self):
+        """One URLError must be retried before succeeding."""
+        import urllib.error
+        from ashiart import io as io_module
+
+        with open(self.test_image_path, "rb") as file:
+            payload = file.read()
+        response = MagicMock()
+        response.__enter__.return_value = response
+        response.read.return_value = payload
+        calls = {"n": 0}
+
+        def flaky(*args, **kwargs):
+            calls["n"] += 1
+            if calls["n"] == 1:
+                raise urllib.error.URLError("boom")
+            return response
+
+        with patch.object(io_module.urllib.request, "urlopen", side_effect=flaky):
+            self.assertEqual(
+                io_module.download_image("http://example.com/x.png", cache=False),
+                payload,
+            )
+        self.assertEqual(calls["n"], 2)
+
+    def test_client_error_does_not_retry(self):
+        """HTTP 4xx must fail fast with the status in the message."""
+        import urllib.error
+        from ashiart import io as io_module
+
+        error = urllib.error.HTTPError(
+            "http://example.com/x.png", 404, "Not Found", {}, None
+        )
+        with patch.object(
+            io_module.urllib.request, "urlopen", side_effect=error
+        ) as mock_open, self.assertRaises(ValueError) as context:
+            io_module.download_image("http://example.com/x.png", cache=False)
+        self.assertIn("404", str(context.exception))
+        self.assertEqual(mock_open.call_count, 1)
 
     def _transparent_fixture(self):
         """Left half transparent, right half opaque black."""

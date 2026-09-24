@@ -109,6 +109,12 @@ class TestCLI(unittest.TestCase):
         mock_open.assert_called_once()
         self.assertTrue(mock_open.call_args[0][0].startswith("file://"))
 
+    def test_no_cache_flag_runs(self):
+        """--no-cache must be accepted and bypass download caching."""
+        with patch("builtins.print"):
+            result = main([self.test_image_path, "--no-cache", "-w", "5", "-H", "3"])
+        self.assertEqual(result, 0)
+
     def test_tonal_flags_run(self):
         """--clahe, --dog, --gamma, --resample, --bg must all be accepted."""
         html_path = os.path.join(self.temp_dir.name, "tonal.html")

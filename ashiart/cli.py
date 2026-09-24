@@ -205,6 +205,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Disable automatic level stretching",
     )
     parser.add_argument(
+        "--no-cache",
+        action="store_true",
+        help="Bypass the URL download cache",
+    )
+    parser.add_argument(
         "--dithering", action="store_true", help="Apply dithering for more texture"
     )
     parser.add_argument(
@@ -331,7 +336,9 @@ def main(argv: list[str] | None = None) -> int:
             return _play_webcam(generator, args)
         if args.play or _is_video_source(source):
             return _play_animation_source(generator, args, source)
-        ascii_art = generator.generate_from_image(source, ansi=args.color)
+        ascii_art = generator.generate_from_image(
+            source, ansi=args.color, cache=not args.no_cache
+        )
 
         if args.html:
             html = generator.generate_html(
@@ -339,6 +346,7 @@ def main(argv: list[str] | None = None) -> int:
                 preserve_color=True,
                 font_size=args.font_size,
                 bg=args.bg,
+                cache=not args.no_cache,
             )
             generator.save_html_to_file(html, args.html)
             print(f"HTML output saved to {args.html}")

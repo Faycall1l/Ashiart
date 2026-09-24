@@ -32,6 +32,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Quality gates: ruff check/format, mypy on `ashiart/`, pytest coverage
   floor at 80%, README python snippets executed as tests; dev tooling
   pinned in `requirements-dev.txt`; weekly Dependabot updates
+- URL robustness: disk cache under `~/.cache/ashiart` (`--no-cache`
+  bypasses), one retry on transient failures, fast fail on HTTP 4xx
 - README gallery with byte-verified per-mode outputs; download and
   last-commit badges
 

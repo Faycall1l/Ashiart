@@ -140,19 +140,22 @@ class AsciiArtGenerator:
 
         return ascii_image
 
-    def generate_from_image(self, image_path: str | bytes, color: bool = False) -> str:
+    def generate_from_image(
+        self, image_path: str | bytes, color: bool = False, cache: bool = True
+    ) -> str:
         """
         Generate ASCII art from an image file.
 
         Args:
-            image_path (str): Local path or http(s) URL.
+            image_path (str): Local path, bytes, or http(s) URL.
             color (bool, optional): Wrap characters in ANSI truecolor codes
                 sampled after resizing. Defaults to False.
+            cache (bool, optional): Reuse cached URL downloads.
 
         Returns:
             str: ASCII art as a string.
         """
-        image = open_image(image_path)
+        image = open_image(image_path, cache=cache)
 
         if color:
             return self.generate_ansi_from_pil_image(image)

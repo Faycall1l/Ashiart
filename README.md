@@ -215,6 +215,7 @@ print(art)
 | `--edges` | off | Sobel overlay: contours as `- / | \` glyphs |
 | `--edge-threshold` | `0.35` | Normalized Sobel magnitude gate for `--edges` |
 | `--no-autocontrast` | off | Disable automatic level stretching |
+| `--no-cache` | off | Bypass the URL download cache |
 | `--dithering` | off | Apply dithering for texture |
 | `--clahe` | off | Local contrast equalization for flat photos |
 | `--dog` | off | DoG detail emphasis: `--dog SMALL LARGE AMPLIFY` |
@@ -316,7 +317,8 @@ ashiart input.jpg --chars "@%*+=-:. "
 Each output cell corresponds to exactly one resized pixel (braille packs
 a 2×4 block per cell). The pipeline, in order:
 
-0. **Load.** Decode from a local path or http(s) URL, apply EXIF
+0. **Load.** Decode from a local path or http(s) URL (downloads cache
+   under `~/.cache/ashiart`, `--no-cache` bypasses), apply EXIF
    orientation so phone photos render upright, and composite
    transparency onto white.
 1. **Resample.** LANCZOS downscale (`--resample box` switches to area
