@@ -150,7 +150,9 @@ def write_index_page(output_dir):
             f"<h2>{path.name}</h2><pre>{html_module.escape(path.read_text(encoding='utf-8'))}</pre>"
         )
     for path in pages:
-        parts.append(f'<h2>{path.name}</h2><p><a href="{path.name}">Open render</a></p>')
+        parts.append(
+            f'<h2>{path.name}</h2><p><a href="{path.name}">Open render</a></p>'
+        )
     page = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -163,7 +165,7 @@ def write_index_page(output_dir):
 </head>
 <body>
 <h1>AshiArt demo gallery</h1>
-{''.join(parts)}
+{"".join(parts)}
 </body>
 </html>"""
     (output_dir / "index.html").write_text(page, encoding="utf-8")

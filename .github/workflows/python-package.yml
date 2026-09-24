@@ -27,8 +27,8 @@ jobs:
         pip install -e .
     - name: Lint with ruff
       run: |
-        python -m ruff check ashiart/ test/ examples/
-        python -m ruff format --check ashiart/ test/ examples/
+        python -m ruff check ashiart/ test/ examples/ scripts/
+        python -m ruff format --check ashiart/ test/ examples/ scripts/
     - name: Type-check with mypy
       run: |
         python -m mypy ashiart/

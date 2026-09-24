@@ -43,9 +43,9 @@ def _members(module):
         if name.startswith("_"):
             continue
         obj = getattr(module, name)
-        if inspect.isfunction(obj) and obj.__module__ == module.__name__:
-            found.append((name, obj))
-        elif inspect.isclass(obj) and obj.__module__ == module.__name__:
+        if getattr(obj, "__module__", None) != module.__name__:
+            continue
+        if inspect.isfunction(obj) or inspect.isclass(obj):
             found.append((name, obj))
     return sorted(found)
 

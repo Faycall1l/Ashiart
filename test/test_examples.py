@@ -19,7 +19,11 @@ class TestEnhancedDemo(unittest.TestCase):
             image_path = os.path.join(tmp, "tiny.png")
             Image.new("RGB", (40, 30), color="gray").save(image_path)
             completed = subprocess.run(
-                [sys.executable, os.path.join(REPO_ROOT, "examples", "enhanced_demo.py"), image_path],
+                [
+                    sys.executable,
+                    os.path.join(REPO_ROOT, "examples", "enhanced_demo.py"),
+                    image_path,
+                ],
                 capture_output=True,
                 text=True,
                 cwd=tmp,
