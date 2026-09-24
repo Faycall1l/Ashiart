@@ -1,5 +1,6 @@
 """README code blocks must execute without errors."""
 
+import contextlib
 import os
 import re
 import unittest
@@ -30,10 +31,8 @@ class TestReadmeSnippets(unittest.TestCase):
                         exec(compile(block, f"{name}#{index}", "exec"), {})
         finally:
             for scratch in SCRATCH_FILES:
-                try:
+                with contextlib.suppress(FileNotFoundError):
                     os.remove(os.path.join(REPO_ROOT, scratch))
-                except FileNotFoundError:
-                    pass
             os.chdir(previous)
 
 
