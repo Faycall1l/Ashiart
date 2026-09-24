@@ -21,6 +21,8 @@
   <img src="https://img.shields.io/github/last-commit/Faycall1l/Ashiart" alt="Last commit" />
 </p>
 
+Lire dans d'autres langues : [Français](README.fr.md).
+
 ## Contents
 
 - [Overview](#overview)
