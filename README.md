@@ -16,6 +16,11 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-green" alt="MIT license" /></a>
 </p>
 
+<p align="center">
+  <a href="https://pypi.org/project/ashiart/"><img src="https://img.shields.io/pypi/dm/ashiart" alt="Monthly downloads" /></a>
+  <img src="https://img.shields.io/github/last-commit/Faycall1l/Ashiart" alt="Last commit" />
+</p>
+
 ## Contents
 
 - [Overview](#overview)
@@ -29,6 +34,7 @@
 - [Character ramp](#character-ramp)
 - [How it works](#how-it-works)
 - [Animation](#animation)
+- [Gallery](#gallery)
 - [Examples](#examples)
 - [Project structure](#project-structure)
 - [Development](#development)
@@ -368,6 +374,113 @@ ashiart --webcam --width 100 --color
 # Export the animation as a self-contained looping HTML page
 ashiart docs/images/demo.gif --play --loop 1 --html animation.html
 ```
+
+## Gallery
+
+Source (`docs/images/puppy-head.jpg`, 700×600):
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Faycall1l/Ashiart/main/docs/images/puppy-head.jpg" width="240" alt="Black puppy head source photo" />
+</p>
+
+<details>
+<summary><code>--mode standard --edges --edge-threshold 0.5</code> (contours + 12-level ramp)</summary>
+
+```text
+%%%%%%SSSSSSS%*+:.   .. ....,+%#@@%;,,,:;+*::;::*::;,::,,:;;
+@@@@@@@@@@@@##@------ --------@@\\\,:::+*;:++:,:+;;:;;;::;;;
+@@@@@@@@@@@@@@#@@@@--------@@@#?:,,,,,,,,,:++;;*++::*++;:;*+
+@@@@@@@@@@@##S##@@@@@@@@@@@@@##S--------,,:;;**+:::::,::;;+*
+#######SS%SS#%SSS###@@@@@@@#%%#@#@@@@@----/..:;;;,.,,.,:;;;+
+###SS###S?S@#SS#S%#@@@#@@@@@#####@#####@@-//  .....:,.:;;;;;
+@#S%#@@@S###S#SSSS######@###@@@@@@@#@@@@##@||::,,,:::;++++*+
+S#SS@#%?%##@#??%%%%S%%%##SSS##@@@@@@#@@@@@@||...,,:,:::,,:,,
+%%%%S%%##S@@SS%??????%SSSSS%%####@@@@@##@@@|:,::::::::;::++;
+S%#S%%%#SS#S@#SS%%S%SSS###SS#@@#@@@@@@@#@@\\+++;;;;+;::;;;;;
+SS#@@#S??SS@@#%%?S#@@#%%#@SS@@S*S##@@@@@@@|:,:,,:;,:;:,..,,:
+S##SS#@%%@@@@#%%S*?%#@SS##S%#@S*%S#@@@@@@@|+:,:,...,;:,,,,.,
+###S??##%@@@@@#S?:**?##SS%%S##@###@@@@@#S%*++;;+;+*;;+****;+
+###S?%S#%S@@##@@/++?SS%S%%SS#@@@@@@@@#@%***++;;;:;;::+*+****
+####?S@#SS@@###@#??%%?%SS%@@##@@@@@@#SS*+***????????*?%*+++*
+####SS@@##@@@###@#S%%??%%%%#####@@@#\**++*?*??+++--++-+*+***
+S####S%#@@@@@@@##@##S?%%##SSS#S##@@#+;;+;;;;;::,..,...,:;;;+
+#S####SS##@@@@@@##@@%?##S########@@#%?%???*******+*+++****??
+#S#####SSS########@#%?#%?**?%S###@@@S%?**+++;+++++++++*+**+?
+@%%S#####S##SS####S?%*?%*?S##@S#@@@@S%?**++++++;;;::::;:::;;
+S-S??%S############?%%?%%S#@####@@@\\;+;;;:++++++**+++*++***
+ -/S%%%%%SSSSS@#@@@@S%%%S#####@@@-\\:,:,:;+++**+***%%%S%%S%%
+  //SS####SSSS###@@@@@@@@@@@@@S?---:::;;::::;::::::;:;;;;++*
+   ///SS#@@###@###@@##@@@@@#@@S%*:,.,,.,,:::;;;;;:;;::;;*?**
+     +#######@@@@@@##%%S#@@#@@#%:,..,,...;+;;;;:::;*??*?%%+:
+```
+
+</details>
+
+<details>
+<summary><code>--mode dense</code> (69 measured levels)</summary>
+
+```text
+XCCXhqpd0bbpdhx1>~.-.:- '''_)jh8@Wq}/i)>IjJr(I(!v||}/(>)i>r]
+MMMM@MMMMMM@$$WMWbv\     ~]o8WMMwvi)*<r1L]>fj^*rtI{rr[[><][}
+@WWWWWWWWWWMW@$%WMMMhfuC0%MMMWwu!ii)*+//i/r1f]}Jjt<>vJtI(]v?
+WW@@@@@WWMWBQ&$$@@@@MMM@WW@@%w8&dqa#J1[(+i(I{Jv1|(><^i>|I]?v
+wB%$$BQObUd&wCpO&QwB@@@W%@MBUX8W%MMMW@M8kf*-_([[{/~/+;\^I[[1
+B$mO0$wBOZbMBOOw0qQMW@$WW@W@$w88B%%%$$%MMW%[ -;:~_;*)"^rIr{I
+%$&XwMM%OQ%w&Q0dbdwm$mwB%%B%MMW@@W@B%WW@$$Mwr|</++^>>[tjJ?v?
+&Qdb@wqaqm8@$anXhhqbUhC8mOb&8m@WWWW@$%WM%WMw~_;:/*(*<>(\**i\
+XUCX&khw8d%%8pkn#oZuoCddbbdCq8mB%@@MM@$%@MMh(*^>rr(>>!r||j1[
+dqw0ChhB&bQO@$&pqqbqd&08mm&dmMM%%W@WMMW$M@k]ljl{Ir{j}|!I]{Ir
+OO%W@%&aZb0WW$CoopmMMmUUB@pp@Mdzbmm@MMM@W@u**(*i|r/>{|)""+/^
+&Qm8O$WhU@@WMBkh&vYq$W&bw8pCw@OcqdQWMMMMMWdf*)<\:;~/}r*ii/"/
+w$BOoawmqMM@W@%bo>zzZm8Obkhp8B@m8wWMWWWQOqJJf][t[jv[]fLzzz[1
+BBw&#C&wU8MW%$%Mk11#dbqdqhb8$@@@WWWMW$Mkzxz1t{{{r}{|(lvfLcvv
+B$wmo&@8dbMM$m$WQYYokokOpq@@$$@WWWMWBpbzlvLxn#ZYuuZ#JYkzf?fv
+Q$mm8dWWwmWMM$BBWwdUCa#hChUQ$mm%WMM$Yzvl?cuxuuflt??tJf?xJzLY
+&wm8m&q$W@@MMM@wmW%$Ouoq8Qbpb8&w$WM8?]ItIrr}I(():_\;''+<Ir}1
+B8B8Qw&p8$W@@MMWw$@WC#$QO8%B88Q$Q@MBCokauuLLvJLLvJvJ?JvLxxna
+$0m$w88ObOwQQQmmQB%$kuwX#xcaUOm$mWW@dUacY?1f[j?tfjt11?vJLv?u
+WCXOQ8wBwOQw&&8m$$baqxukYa88B@d8WWW@OXuxx?jtjft}}]|^^>r<(|}[
+dqpu#k0w$mw8wmwB$$wokkahXdQ%%w8$@WMw{}jI}]!1JtfJfzL1t1J1fJcL
+  v&hokhq0bdpO%%WWM%&qhq&QQmB8@MMMwu<**+<]jJ1xvjzcckkUdCCbUh
+ .:t08wwwQ&&dbQ$%@W@@MWW@@@@@@OavJ]>(r{{>^||r>!>|r!I!r{{]t?J
+  `_1&&0m%@%$%W$m%@@BQ%MMM@B@WbXJ!i")/_\i(|!}I}I{>II!|{{vYcJ
+ `   1$w8wB$%WMMMMW%8hkdBW@$%%Qk|i~_\i~_;{l[[]}^!>]J#ucaCol|
+```
+
+</details>
+
+<details>
+<summary><code>--mode blocks</code> (5-level geometric ramp)</summary>
+
+```text
+▓▓▓▓▓▓▓▓▓▓▓▓▓▓▒▒░           ░▒▓▓██▓░░░░░░▒▒░░░░░▒░░░░░░░░░░▒
+█████████████████▓▒░      ▒▓▓████▒░░░░░▒▒▒░▒▒░░░▒░░░░▒▒░░▒▒░
+████████████████████▓▒▒▓▓██████▒░░░░░░░░░░░▒▒▒░▒▒▒░░▒▒▒░░▒▒▒
+█████████████▓████████████████▓▓▓▓▓▓▒▒▒░░░░░░▒▒▒░░░░░░░░░▒▒▒
+███████▓▓▓▓▓█▓▓▓▓███████████▓▓▓████████▓▓▒░  ░▒▒░░ ░░ ░░░▒▒▒
+███▓▓███▓▓▓██▓▓█▓▓████████████▓▓███████████▒       ░░░░░░░░░
+██▓▓████▓███▓█▓▓▓▓██████████████████████████░░░░░░░░░▒▒▒▒▒▒▒
+▓█▓▓██▓▓▓█▓██▓▒▓▓▓▓▓▓▓▓▓█▓▓▓▓███████████████    ░░░░░░░░░░░░
+▓▓▓▓▓▓▓█▓▓██▓▓▓▒▓▓▓▒▓▓▓▓▓▓▓▓▓▓█████████████▓░░░░░░░░░░░░░▒▒▒
+▓▓█▓▓▓▓█▓▓█▓██▓▓▓▓▓▓▓▓▓▓██▓▓██████████████▓▒▒▒▒░░░░▒░░░░▒░░░
+▓▓████▓▓▓▓▓███▓▓▓▓████▓▓██▓▓██▓▒▓█████████▒░░░░░░░░░░░░░░░░░
+▓██▓▓██▓▓█████▓▓▓▒▒▓██▓▓█▓▓▓██▓▒▓▓████████▓▒░░░░   ░░░░░░░░░
+███▓▓▓██▓██████▓▓░▒▒▓█▓▓▓▓▓▓▓███▓███████▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+███▓▓▓▓█▓▓██████▓▒▒▓▓▓▓▓▓▓▓▓███████████▓▒▒▒▒▒░░░░░░░░▒▒▒▒▒▒▒
+████▓▓█▓▓▓███████▒▒▓▓▓▓▓▓▓███████████▓▓▒▒▒▒▒▒▓▓▒▒▒▓▓▒▒▓▒▒▒▒▒
+████▓▓████████████▓▓▓▓▓▓▓▓▓█████████▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+▓██▓█▓▓█████████████▓▒▓▓▓█▓▓▓▓▓████▓▒▒░▒░░░░░░░░  ░   ░░░░░▒
+█▓█▓██▓▓▓███████████▓▓██▓▓██▓▓██████▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▓
+█▓███▓▓▓▓▓██████████▓▒█▓▓▒▒▓▓▓██████▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+█▓▓▓█▓███▓██▓▓▓███▓▓▓▒▒▓▒▓▓▓██▓▓████▓▓▒▒▒▒▒▒▒▒▒░░▒░░░░░░░░░▒
+▓▓▓▒▓▓▓████▓███████▓▓▓▓▓▓▓████▓█████░░▒░░▒░▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒
+  ▒▓▓▓▓▓▓▓▓▓▓▓██████▓▓▓▓▓████▓█████▒░░░░░▒▒▒▒▒▒▒▒▒▒▓▓▓▓▓▓▓▓▓
+   ▒▓▓████▓▓▓▓████████████████▓▓▒▒▒░░░░░░░░░░░░░░░░░░░░░▒▒▒▒
+    ▒▓▓▓██████████████████████▓▓▒░░░░░ ░░░░░░░░░░░░░░░░░▒▒▒▒
+     ▒██▓███████████▓▓▓▓███████▓░░  ░░   ░▒▒▒▒░░░░▒▒▓▒▒▓▓▓▒░
+```
+
+</details>
 
 ## Examples
 

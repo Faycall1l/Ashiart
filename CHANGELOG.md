@@ -29,6 +29,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   `examples/benchmark.py` throughput harness
 - `ashiart/tonal.py`: NumPy CLAHE (`--clahe`) and Difference-of-Gaussians
   (`--dog SMALL LARGE AMPLIFY`) detail operators, dependency-free
+- README gallery with byte-verified per-mode outputs; download and
+  last-commit badges
 
 - Edge-aware rendering: Sobel orientation overlay (`- / | \`) on strong
   contours (`edges`, `--edges`, `--edge-threshold`, threshold 0.35);
