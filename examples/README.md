@@ -34,5 +34,7 @@ image automatically. `enhanced_demo.py` requires an image path argument.
 `basic_usage.py` prints to stdout and writes `output.txt`.
 `enhanced_demo.py` writes a `demo_outputs/` directory: one text file per
 rendering mode and enhancement combination (`demo_standard*.txt`,
-`demo_dense.txt`, `demo_blocks.txt`, `demo_braille.txt`) plus
-color-preserving HTML renders (`demo_color*.html`). 
+`demo_dense.txt`, `demo_blocks.txt`, `demo_braille.txt`), color-preserving
+HTML renders (`demo_color*.html`), and an `index.html` gallery page
+stitching them together. `examples/benchmark.py` reports render
+throughput per mode and width. 

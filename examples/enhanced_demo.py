@@ -130,11 +130,43 @@ def main():
     demo_standard_enhancements(image_path, output_dir)
     demo_rendering_modes(image_path, output_dir)
     demo_html_outputs(image_path, output_dir)
+    write_index_page(output_dir)
 
     print("\nAll demos completed successfully!")
     print(f"Check the output files in the '{output_dir}' directory")
 
     return 0
+
+
+def write_index_page(output_dir):
+    """Write an index.html gallery stitching every demo output together."""
+    import html as html_module
+
+    texts = sorted(output_dir.glob("demo_*.txt"))
+    pages = sorted(output_dir.glob("demo_*.html"))
+    parts = []
+    for path in texts:
+        parts.append(
+            f"<h2>{path.name}</h2><pre>{html_module.escape(path.read_text(encoding='utf-8'))}</pre>"
+        )
+    for path in pages:
+        parts.append(f'<h2>{path.name}</h2><p><a href="{path.name}">Open render</a></p>')
+    page = f"""<!DOCTYPE html>
+<html>
+<head>
+<title>AshiArt demo gallery</title>
+<style>
+  body {{ font-family: sans-serif; background: #0d1117; color: #e6edf3; }}
+  pre {{ font-family: monospace; font-size: 8px; line-height: 1; background: black; color: white; display: inline-block; padding: 10px; }}
+  a {{ color: #58a6ff; }}
+</style>
+</head>
+<body>
+<h1>AshiArt demo gallery</h1>
+{''.join(parts)}
+</body>
+</html>"""
+    (output_dir / "index.html").write_text(page, encoding="utf-8")
 
 
 if __name__ == "__main__":

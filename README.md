@@ -37,6 +37,7 @@ Lire dans d'autres langues : [Français](README.fr.md).
 - [How it works](#how-it-works)
 - [Animation](#animation)
 - [Gallery](#gallery)
+- [Performance](#performance)
 - [Examples](#examples)
 - [Project structure](#project-structure)
 - [Development](#development)
@@ -485,6 +486,23 @@ dqpu#k0w$mw8wmwB$$wokkahXdQ%%w8$@WMw{}jI}]!1JtfJfzL1t1J1fJcL
 ```
 
 </details>
+
+## Performance
+
+Character mapping runs vectorized over a 256-entry lookup table, so
+throughput scales with pixels, not grid size. Measured with
+`examples/benchmark.py` (best of 5, Apple arm64, CPython 3.9,
+`puppy-head.jpg`):
+
+| Mode | Width 60 | Width 100 | Width 200 |
+| --- | --- | --- | --- |
+| `standard` | ~105k chars/s | ~110k chars/s | ~660k chars/s |
+| `dense` | ~105k chars/s | ~260k chars/s | ~520k chars/s |
+| `blocks` | ~130k chars/s | ~270k chars/s | ~590k chars/s |
+
+A 200-column dense frame holds ~17k characters, so conversion alone
+sustains roughly 30 fps — fast enough for the `--play` and `--webcam`
+paths, where terminal redraw, not mapping, is the bottleneck.
 
 ## Examples
 

@@ -32,6 +32,9 @@ jobs:
     - name: Type-check with mypy
       run: |
         python -m mypy ashiart/
+    - name: Check generated API docs
+      run: |
+        python scripts/gen_api.py --check
     - name: Test with pytest
       run: |
         python -m pytest --cov=ashiart --cov-report=term-missing --cov-fail-under=80 

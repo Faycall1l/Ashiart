@@ -34,6 +34,9 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
   pinned in `requirements-dev.txt`; weekly Dependabot updates
 - URL robustness: disk cache under `~/.cache/ashiart` (`--no-cache`
   bypasses), one retry on transient failures, fast fail on HTTP 4xx
+- Docs engine: `scripts/gen_api.py` generating `docs/API.md` from
+  docstrings (CI-checked), README performance table from
+  `examples/benchmark.py`, `demo_outputs/index.html` gallery page
 - README gallery with byte-verified per-mode outputs; download and
   last-commit badges
 
