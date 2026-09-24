@@ -208,8 +208,9 @@ class TestAsciiArtGenerator(unittest.TestCase):
         counter = {"n": 0}
         server, thread = self._http_server(counter)
         url = f"http://127.0.0.1:{server.server_address[1]}/test_image.png"
-        with tempfile.TemporaryDirectory() as cache_home, patch.dict(
-            os.environ, {"XDG_CACHE_HOME": cache_home}
+        with (
+            tempfile.TemporaryDirectory() as cache_home,
+            patch.dict(os.environ, {"XDG_CACHE_HOME": cache_home}),
         ):
             first = self.generator.generate_from_image(url)
             second = self.generator.generate_from_image(url)
@@ -228,8 +229,9 @@ class TestAsciiArtGenerator(unittest.TestCase):
         server, thread = self._http_server(counter)
         try:
             url = f"http://127.0.0.1:{server.server_address[1]}/test_image.png"
-            with tempfile.TemporaryDirectory() as cache_home, patch.dict(
-                os.environ, {"XDG_CACHE_HOME": cache_home}
+            with (
+                tempfile.TemporaryDirectory() as cache_home,
+                patch.dict(os.environ, {"XDG_CACHE_HOME": cache_home}),
             ):
                 self.generator.generate_from_image(url, cache=False)
                 self.generator.generate_from_image(url, cache=False)
@@ -271,9 +273,12 @@ class TestAsciiArtGenerator(unittest.TestCase):
         error = urllib.error.HTTPError(
             "http://example.com/x.png", 404, "Not Found", {}, None
         )
-        with patch.object(
-            io_module.urllib.request, "urlopen", side_effect=error
-        ) as mock_open, self.assertRaises(ValueError) as context:
+        with (
+            patch.object(
+                io_module.urllib.request, "urlopen", side_effect=error
+            ) as mock_open,
+            self.assertRaises(ValueError) as context,
+        ):
             io_module.download_image("http://example.com/x.png", cache=False)
         self.assertIn("404", str(context.exception))
         self.assertEqual(mock_open.call_count, 1)

@@ -159,9 +159,10 @@ class TestVideo(unittest.TestCase):
     def test_missing_cv2_explains_extra(self):
         from ashiart.video import _require_cv2
 
-        with patch.dict(sys.modules, {"cv2": None}), self.assertRaises(
-            ValueError
-        ) as context:
+        with (
+            patch.dict(sys.modules, {"cv2": None}),
+            self.assertRaises(ValueError) as context,
+        ):
             _require_cv2()
         self.assertIn("ashiart[video]", str(context.exception))
 

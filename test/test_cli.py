@@ -37,9 +37,10 @@ class TestCLI(unittest.TestCase):
         with open(self.test_image_path, "rb") as file:
             payload = file.read()
         fake_stdin = types.SimpleNamespace(buffer=stdlib_io.BytesIO(payload))
-        with patch.object(sys, "stdin", fake_stdin), patch(
-            "builtins.print"
-        ) as mock_print:
+        with (
+            patch.object(sys, "stdin", fake_stdin),
+            patch("builtins.print") as mock_print,
+        ):
             result = main(["-", "-w", "5", "-H", "3"])
         self.assertEqual(result, 0)
         mock_print.assert_called_once()
@@ -51,8 +52,9 @@ class TestCLI(unittest.TestCase):
         import io as stdlib_io
 
         buffer = stdlib_io.StringIO()
-        with patch.dict(os.environ, {"NO_COLOR": "1"}), contextlib.redirect_stdout(
-            buffer
+        with (
+            patch.dict(os.environ, {"NO_COLOR": "1"}),
+            contextlib.redirect_stdout(buffer),
         ):
             result = main([self.test_image_path, "--color", "-w", "5", "-H", "3"])
         self.assertEqual(result, 0)
@@ -152,10 +154,14 @@ class TestCLI(unittest.TestCase):
         import shutil as shutil_module
 
         buffer = stdlib_io.StringIO()
-        with contextlib.redirect_stdout(buffer), patch.object(
-            buffer, "isatty", return_value=True
-        ), patch.object(
-            shutil_module, "get_terminal_size", return_value=os.terminal_size((40, 24))
+        with (
+            contextlib.redirect_stdout(buffer),
+            patch.object(buffer, "isatty", return_value=True),
+            patch.object(
+                shutil_module,
+                "get_terminal_size",
+                return_value=os.terminal_size((40, 24)),
+            ),
         ):
             result = main([self.test_image_path])
         self.assertEqual(result, 0)
@@ -216,9 +222,11 @@ class TestCLI(unittest.TestCase):
         movie = os.path.join(self.temp_dir.name, "movie.mp4")
         with open(movie, "wb") as file:
             file.write(b"not a video")
-        with patch.dict(sys.modules, {"cv2": None}), patch("sys.stderr"), patch(
-            "builtins.print"
-        ) as mock_print:
+        with (
+            patch.dict(sys.modules, {"cv2": None}),
+            patch("sys.stderr"),
+            patch("builtins.print") as mock_print,
+        ):
             result = main([movie, "--play"])
         self.assertEqual(result, 1)
         self.assertIn("ashiart[video]", mock_print.call_args[0][0])
@@ -253,8 +261,9 @@ class TestCLI(unittest.TestCase):
                 return frame[:, :, ::-1]
 
         buffer = stdlib_io.StringIO()
-        with patch.dict(sys.modules, {"cv2": FakeCv2()}), contextlib.redirect_stdout(
-            buffer
+        with (
+            patch.dict(sys.modules, {"cv2": FakeCv2()}),
+            contextlib.redirect_stdout(buffer),
         ):
             result = main(["--webcam", "-w", "8", "-H", "4"])
         self.assertEqual(result, 0)
