@@ -71,6 +71,7 @@ venv.bak/
 # Project specific (generated outputs; curated assets under docs/ are tracked)
 *.txt
 !requirements.txt
+!requirements-dev.txt
 *.jpg
 *.jpeg
 *.png
