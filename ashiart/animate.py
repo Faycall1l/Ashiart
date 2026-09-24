@@ -93,7 +93,7 @@ def play_animation(
     output.write(CLEAR_SCREEN)
     try:
         while loops == 0 or completed < loops:
-            for text, duration in zip(frames, durations):
+            for text, duration in zip(frames, durations, strict=True):
                 started = time.monotonic()
                 output.write(CURSOR_HOME + text)
                 output.flush()

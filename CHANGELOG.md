@@ -5,6 +5,12 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- Minimum Python raised to 3.10 (3.8 and 3.9 are end-of-life);
+  dependency pins modernized (Pillow 12, NumPy 2, pytest 9),
+  CI matrix 3.10–3.12, actions refreshed to checkout/setup-python v7
+
 ## [0.3.0] - 2026-09-24
 
 ### Added

@@ -319,8 +319,8 @@ class EnhancedAsciiArtGenerator:
         if edge_grid is None:
             return ascii_image
         return [
-            [e if e is not None else c for c, e in zip(arow, erow)]
-            for arow, erow in zip(ascii_image, edge_grid)
+            [e if e is not None else c for c, e in zip(arow, erow, strict=True)]
+            for arow, erow in zip(ascii_image, edge_grid, strict=True)
         ]
 
     def _apply_dithering(self, image):
