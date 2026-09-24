@@ -318,8 +318,9 @@ ashiart input.jpg --chars "@%*+=-:. "
 Each output cell corresponds to exactly one resized pixel (braille packs
 a 2×4 block per cell). The pipeline, in order:
 
-0. **Load.** Decode from a local path or http(s) URL (downloads cache
-   under `~/.cache/ashiart`, `--no-cache` bypasses), apply EXIF
+0. **Load.** Decode from a local path, http(s) URL (downloads cache
+   under `~/.cache/ashiart`, `--no-cache` bypasses), piped stdin bytes,
+   or the procedural `--demo` image. Apply EXIF
    orientation so phone photos render upright, and composite
    transparency onto white.
 1. **Resample.** LANCZOS downscale (`--resample box` switches to area
@@ -331,7 +332,8 @@ a 2×4 block per cell). The pipeline, in order:
    filter and optional inversion. All default to neutral.
 3. **Grayscale.** PIL `L` mode (ITU-R BT.601 luma). Autocontrast, on by
    default, stretches the used range to 0–255 with a 1% cutoff;
-   optional CLAHE then equalizes local contrast tile by tile.
+   optional CLAHE then equalizes local contrast tile by tile, and
+   optional dithering reduces to 1-bit texture.
 4. **Edge field (optional, `--edges`).** 3×3 Sobel gradients per cell,
    magnitude normalized by the frame peak. Cells at or above
    `--edge-threshold` (default 0.35) take a contour glyph from the
@@ -350,7 +352,8 @@ a 2×4 block per cell). The pipeline, in order:
    brightness bucket. Braille cells threshold each of their 8 dots
    at 128 instead.
 6. **Emit.** Plain text, ANSI truecolor foreground per cell, or HTML
-   `<span>` elements preserving the enhanced per-cell color.
+   `<span>` elements preserving the enhanced per-cell color on a black
+   or white page (`--bg`).
 
 ## Animation
 

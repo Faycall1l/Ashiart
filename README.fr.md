@@ -38,6 +38,7 @@
 - [Fonctionnement](#fonctionnement)
 - [Animation](#animation)
 - [Galerie](#galerie)
+- [Performance](#performance)
 - [Exemples](#exemples)
 - [Structure du projet](#structure-du-projet)
 - [Développement](#développement)
@@ -220,6 +221,7 @@ print(art)
 | `--edges` | off | Surimpression Sobel : contours en glyphes `- / | \` |
 | `--edge-threshold` | `0.35` | Seuil de magnitude Sobel normalisée pour `--edges` |
 | `--no-autocontrast` | off | Désactive l'étirement automatique des niveaux |
+| `--no-cache` | off | Contourne le cache de téléchargement des URL |
 | `--dithering` | off | Applique un tramage pour la texture |
 | `--clahe` | off | Égalisation locale du contraste pour les photos plates |
 | `--dog` | off | Accentuation DoG : `--dog SMALL LARGE AMPLIFY` |
@@ -324,7 +326,9 @@ ashiart input.jpg --chars "@%*+=-:. "
 Chaque cellule de sortie correspond à exactement un pixel rééchantillonné
 (le braille regroupe un bloc 2×4 par cellule). Le pipeline, dans l'ordre :
 
-0. **Chargement.** Décodage depuis un chemin local ou une URL http(s),
+0. **Chargement.** Décodage depuis un chemin local, une URL http(s)
+   (téléchargements en cache sous `~/.cache/ashiart`, `--no-cache`
+   contourne), des octets pipés ou l'image procédurale `--demo`,
    application de l'orientation EXIF pour redresser les photos de
    téléphone, et fusion de la transparence sur blanc.
 1. **Rééchantillonnage.** Sous-échantillonnage LANCZOS (`--resample box`
@@ -339,7 +343,8 @@ Chaque cellule de sortie correspond à exactement un pixel rééchantillonné
 3. **Niveaux de gris.** Mode `L` de PIL (luma ITU-R BT.601).
    L'autocontraste, activé par défaut, étire la plage utilisée vers
    0–255 avec un seuil de 1 % ; l'option CLAHE égalise ensuite le
-   contraste local tuile par tuile.
+   contraste local tuile par tuile, et le tramage optionnel réduit à
+   une texture 1-bit.
 4. **Champ de contours (optionnel, `--edges`).** Gradients de Sobel 3×3
    par cellule, magnitude normalisée par le pic de l'image. Les cellules
    au seuil ou au-delà (`--edge-threshold`, défaut 0,35) prennent un
@@ -360,7 +365,7 @@ Chaque cellule de sortie correspond à exactement un pixel rééchantillonné
    8 points à 128.
 6. **Émission.** Texte brut, premier plan ANSI en vraies couleurs par
    cellule, ou éléments HTML `<span>` préservant la couleur par cellule
-   après enhancement.
+   après enhancement, sur fond noir ou blanc (`--bg`).
 
 ## Animation
 
@@ -400,6 +405,16 @@ Source (`docs/images/puppy-head.jpg`, 700×600) :
 
 Voir le [README anglais](README.md#gallery) pour les trois rendus
 commentés (les blocs ASCII y sont vérifiés à l'octet près).
+
+## Performance
+
+Le transcodage est vectorisé sur une table de correspondance à 256
+entrées : de l'ordre de 100k caractères/s à largeur 60, 500k+ à
+largeur 200 (dense) sur Apple arm64, CPython 3.9, mesuré avec
+`examples/benchmark.py`. Voir le [tableau complet](README.md#performance)
+dans le README anglais : à 200 colonnes, la conversion seule tient
+~30 images/s — le redessin du terminal, pas le transcodage, limite
+`--play` et `--webcam`.
 
 ## Exemples
 
