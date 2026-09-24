@@ -22,7 +22,7 @@ except ImportError:
         return generator.generate_from_image(image_path)
 
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 __all__ = ["AsciiArtGenerator", "image_to_ascii"]
 
 if HAS_ENHANCED:

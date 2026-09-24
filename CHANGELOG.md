@@ -5,6 +5,8 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-24
+
 ### Added
 
 - Image URLs as input: local paths and http(s) URLs work interchangeably

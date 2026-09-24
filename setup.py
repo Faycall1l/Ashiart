@@ -2,7 +2,8 @@ from setuptools import setup, find_packages
 
 setup(
     name="ashiart",
-    version="0.2.0",
+    # Version is the single source in ashiart/__init__.py via
+    # setup.cfg (attr: ashiart.__version__); do not duplicate it here.
     packages=find_packages(),
     install_requires=[
         "pillow>=10.0.0",
