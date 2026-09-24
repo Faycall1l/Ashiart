@@ -13,11 +13,13 @@ for the core package (video and similar stay behind extras).
 
 ## Setup
 
+Requires Python 3.10 or newer (the test suite uses 3.10+ syntax).
+
 ```bash
 git clone https://github.com/Faycall1l/Ashiart.git
 cd Ashiart
 pip install -e .
-pip install pytest
+pip install -r requirements-dev.txt
 ```
 
 ## Rules
