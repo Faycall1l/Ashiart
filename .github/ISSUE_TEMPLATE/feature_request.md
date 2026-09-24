@@ -1,22 +1,21 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Propose a well-scoped addition
 title: ''
 labels: enhancement
 assignees: ''
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
+**Problem**
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+What cannot be done today, and who is blocked by it.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Proposal**
 
-**Example use case**
-Provide an example of how this feature would be used in practice.
+The smallest change that solves it (flags, modes, output formats).
+Check CONTRIBUTING.md scope first: no GUI apps, no hosted services,
+no new hard dependencies for the core package.
 
-**Additional context**
-Add any other context or screenshots about the feature request here. 
+**Alternatives considered**
+
+What you tried or rejected, briefly.

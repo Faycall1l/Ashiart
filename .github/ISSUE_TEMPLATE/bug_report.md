@@ -1,31 +1,34 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Report a reproducible defect
 title: ''
 labels: bug
 assignees: ''
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**What breaks**
 
-**To Reproduce**
-Steps to reproduce the behavior:
-1. Install version '...'
-2. Run command '....'
-3. Use function '....'
-4. See error
+A clear description of the defect. One issue per report.
 
-**Expected behavior**
-A clear and concise description of what you expected to happen.
+**Reproduction**
 
-**Screenshots or Output**
-If applicable, add screenshots or copy the error output to help explain your problem.
+Exact commands or code, plus the input (attach the image or a URL):
 
-**Environment (please complete the following information):**
- - OS: [e.g. Ubuntu 20.04, macOS 12.0]
- - Python version: [e.g. 3.9.1]
- - Package version: [e.g. 0.1.0]
+```bash
+ashiart docs/images/puppy.jpg --width 60 --edges
+```
 
-**Additional context**
-Add any other context about the problem here. 
+**Expected output**
+
+What you expected, and why (link docs if they promise it).
+
+**Actual output**
+
+Paste the output or traceback.
+
+**Environment**
+
+- OS:
+- Python version (`python3 --version`):
+- AshiArt version (`pip show ashiart`, or commit hash):
+- Install method (PyPI / source):
