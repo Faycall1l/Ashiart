@@ -6,16 +6,13 @@ This directory holds the image assets referenced by the main README.
 
 - `images/logo.svg` — project logo; a flat 4×4 density grid fading
   solid to empty, the product (brightness to ink) as geometry
-- `images/sample.jpg` / `images/example.jpg` — owl photo used across
-  code snippets and API examples
+- `images/sample.jpg` — owl photo used in README code snippets
 - `images/puppy.jpg` — high-contrast hero sample in the main README
 - `images/puppy-head.jpg` — tight crop feeding the truecolor demo
 - `images/owl-face.jpg` — tight crop for dense-mode detail demos
 - `images/color-preview.png` — rendered truecolor output shown in
   the main README (Markdown cannot display ANSI escapes)
-
-`sample.jpg` and `example.jpg` are byte-identical; both names are kept
-because existing snippets and examples reference each path.
+- `images/demo.gif` — source animation for the `--play` demo
 
 Photo credits: owl photo from the original project import;
 puppy via Lorem Picsum (id 237, Unsplash license).

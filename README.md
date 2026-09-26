@@ -531,12 +531,13 @@ test/
   test_enhanced.py
   test_cli.py
 docs/images/
-  logo.svg           Project logo and brightness-ramp reference
+  logo.svg           Project logo: flat 4x4 density grid
   sample.jpg         Sample input used in code snippets
   puppy.jpg          High-contrast hero sample used in this README
   puppy-head.jpg     Tight head crop for the color demo
   owl-face.jpg       Tight face crop for high-detail demos
   color-preview.png  Rendered truecolor preview shown above
+  demo.gif           Source animation for the --play demo
 examples/
   basic_usage.py
   enhanced_demo.py
