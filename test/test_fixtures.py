@@ -51,8 +51,10 @@ class TestPhotoFixtures(unittest.TestCase):
         for path in (PORTRAIT, WATERLILY):
             with self.subTest(fixture=os.path.basename(path)):
                 art = image_to_ascii(path, width=60, edges=True, edge_threshold=0.5)
-                strokes = sum(line.count("/") + line.count("\\") + line.count("|")
-                              for line in art.split("\n"))
+                strokes = sum(
+                    line.count("/") + line.count("\\") + line.count("|")
+                    for line in art.split("\n")
+                )
                 self.assertGreater(strokes, 20)
 
     def test_dark_subject_maps_dark(self):
@@ -61,8 +63,20 @@ class TestPhotoFixtures(unittest.TestCase):
         lines = art.split("\n")
         top = "".join(lines[:6])
         middle = "".join(lines[10:16])
-        density = {"@": 9, "#": 8, "S": 7, "%": 6, "?": 5, "*": 4,
-                   "+": 3, ";": 2, ":": 1, ",": 0, ".": 0, " ": 0}
+        density = {
+            "@": 9,
+            "#": 8,
+            "S": 7,
+            "%": 6,
+            "?": 5,
+            "*": 4,
+            "+": 3,
+            ";": 2,
+            ":": 1,
+            ",": 0,
+            ".": 0,
+            " ": 0,
+        }
         dark = sum(density.get(char, 4) for char in top) / max(len(top), 1)
         light = sum(density.get(char, 4) for char in middle) / max(len(middle), 1)
         self.assertGreater(dark, light)
