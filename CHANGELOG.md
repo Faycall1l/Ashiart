@@ -5,6 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Real-photo test fixtures: `scripts/fetch_fixtures.py` pins two
+  ASCII-friendly online photos (portrait, waterlily) by URL and SHA256
+  into `test/fixtures/`; `test/test_fixtures.py` asserts geometry,
+  determinism, tonal spread, and edge tracing on them
+
 ### Changed
 
 - Minimum Python raised to 3.10 (3.8 and 3.9 are end-of-life);

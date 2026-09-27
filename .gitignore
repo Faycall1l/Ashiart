@@ -80,5 +80,6 @@ venv.bak/
 !docs/images/*.jpeg
 !docs/images/*.png
 !docs/images/*.gif
+!test/fixtures/*.jpg
 output*/
 demo_outputs/ 

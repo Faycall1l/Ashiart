@@ -3,4 +3,4 @@ include LICENSE
 include requirements.txt
 recursive-include docs *.svg *.jpg
 recursive-include examples *.py *.md
-recursive-include test *.py 
+recursive-include test *.py *.jpg 
